@@ -68,7 +68,7 @@
                             </a>
                         </div>
                         <% if env.get("preferences").as(Preferences).show_nick %>
-                            <div class="pure-u-1-4">
+                            <div class="pure-u-1-4" style="max-height: 16.5px;overflow: hidden;">
                                 <span id="user_name"><%= env.get("user").as(User).email %></span>
                             </div>
                         <% end %>
