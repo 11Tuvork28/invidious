@@ -42,7 +42,7 @@ struct ConfigPreferences
   property volume : Int32 = 100
   property vr_mode : Bool = true
   property show_nick : Bool = true
-  property save_player_pos : Bool = false
+  property save_player_pos : Bool = true
 
   def to_tuple
     {% begin %}
