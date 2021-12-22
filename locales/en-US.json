@@ -452,8 +452,6 @@
     "footer_source_code": "Source code",
     "footer_original_source_code": "Original source code",
     "footer_modfied_source_code": "Modified Source code",
-    "adminprefs_modified_source_code_url_label": "URL to modified source code repository",
-    "preferences_save_player_pos_label": "Save the current video time: ",
     "none": "none",
     "videoinfo_started_streaming_x_ago": "Started streaming `x` ago",
     "videoinfo_watch_on_youTube": "Watch on YouTube",
@@ -462,5 +460,6 @@
     "download_subtitles": "Subtitles - `x` (.vtt)",
     "user_created_playlists": "`x` created playlists",
     "user_saved_playlists": "`x` saved playlists",
-    "Video unavailable": "Video unavailable"
+    "Video unavailable": "Video unavailable",
+    "preferences_save_player_pos_label": "Save the current video time: "
 }
