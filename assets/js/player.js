@@ -202,6 +202,10 @@ if (video_data.premiere_timestamp && Math.round(new Date() / 1000) < video_data.
 }
 
 if (video_data.params.save_player_pos) {
+  if ( video_data.params.enable_exclude_save_player_pos_for_few_genres && ["Music"].includes(video_data.genre)) {    
+    console.log("Skipping, removing saved timestamp.");
+    remove_all_video_times();
+  } else {
     const url = new URL(location);
     const hasTimeParam = url.searchParams.has("t");
     const remeberedTime = get_video_time();
@@ -222,6 +226,7 @@ if (video_data.params.save_player_pos) {
     };
 
     player.on("timeupdate", updateTime);
+  }
 }
 else {
     remove_all_video_times();
