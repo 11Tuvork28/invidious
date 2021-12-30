@@ -219,7 +219,7 @@ if (video_data.params.save_player_pos) {
         const raw = player.currentTime();
         const time = Math.floor(raw);
 
-        if(lastUpdated !== tim e&& raw <= video_data.length_seconds - 15) {
+        if(lastUpdated !== time && raw <= video_data.length_seconds - 15) {
             save_video_time(time);
             lastUpdated = time;
         }
