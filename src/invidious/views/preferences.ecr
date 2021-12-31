@@ -124,6 +124,10 @@
                 <label for="enable_exclude_save_player_pos_for_few_genres"><%= translate(locale, "preferences_enable_exclude_save_player_pos_for_few_genres") %></label>
                 <input name="enable_exclude_save_player_pos_for_few_genres" id="enable_exclude_save_player_pos_for_few_genres" type="checkbox" <% if preferences.enable_exclude_save_player_pos_for_few_genres %>checked<% end %>>
             </div>
+            <div class="pure-control-group">
+                <label for="always_loop_playlist"><%= translate(locale, "preferences_always_loop_playlist") %></label>
+                <input name="always_loop_playlist" id="always_loop_playlist" type="checkbox" <% if preferences.always_loop_playlist %>checked<% end %>>
+            </div>
             <legend><%= translate(locale, "preferences_category_visual") %></legend>
 
             <div class="pure-control-group">

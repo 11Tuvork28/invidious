@@ -44,6 +44,7 @@ struct ConfigPreferences
   property show_nick : Bool = true
   property save_player_pos : Bool = true
   property enable_exclude_save_player_pos_for_few_genres : Bool = false
+  property always_loop_playlist : Bool = false
 
   def to_tuple
     {% begin %}

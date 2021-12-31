@@ -433,5 +433,6 @@
   "adminprefs_modified_source_code_url_label": "URL zum Repositorie des modifizierten Quellcodes",
   "short": "Kurz (< 4 Minuten)",
   "preferences_region_label": "Land der Inhalte: ",
-  "preferences_enable_exclude_save_player_pos_for_few_genres": "Wiedergabezeit für music Videos nicht speichern einschalten/auschalten: "
+  "preferences_enable_exclude_save_player_pos_for_few_genres": "Wiedergabezeit für music Videos nicht speichern einschalten/auschalten: ",
+  "preferences_always_loop_playlist": "Wiedergabelisten immer wiederholen, funktioniert derzeit nur für Wiedergabelisten mit bis zu 50 Videos: "
 }

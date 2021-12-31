@@ -55,6 +55,7 @@ struct Preferences
   property volume : Int32 = CONFIG.default_user_preferences.volume
   property save_player_pos : Bool = CONFIG.default_user_preferences.save_player_pos
   property enable_exclude_save_player_pos_for_few_genres : Bool = CONFIG.default_user_preferences.enable_exclude_save_player_pos_for_few_genres
+  property always_loop_playlist : Bool = CONFIG.default_user_preferences.always_loop_playlist
 
   module BoolToString
     def self.to_json(value : String, json : JSON::Builder)

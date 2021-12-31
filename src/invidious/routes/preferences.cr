@@ -78,6 +78,10 @@ module Invidious::Routes::PreferencesRoute
     enable_exclude_save_player_pos_for_few_genres ||= "off"
     enable_exclude_save_player_pos_for_few_genres = enable_exclude_save_player_pos_for_few_genres == "on"
 
+    always_loop_playlist = env.params.body["always_loop_playlist"]?.try &.as(String)
+    always_loop_playlist ||= "off"
+    always_loop_playlist = always_loop_playlist == "on"
+
     show_nick = env.params.body["show_nick"]?.try &.as(String)
     show_nick ||= "off"
     show_nick = show_nick == "on"
@@ -175,6 +179,7 @@ module Invidious::Routes::PreferencesRoute
       show_nick:                   show_nick,
       save_player_pos:             save_player_pos,
       enable_exclude_save_player_pos_for_few_genres: enable_exclude_save_player_pos_for_few_genres,
+      always_loop_playlist:        always_loop_playlist
     }.to_json).to_json
 
     if user = env.get? "user"

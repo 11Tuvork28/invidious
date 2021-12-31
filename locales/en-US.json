@@ -462,5 +462,6 @@
   "user_saved_playlists": "`x` saved playlists",
   "Video unavailable": "Video unavailable",
   "preferences_save_player_pos_label": "Save the current video time: ",
-  "preferences_enable_exclude_save_player_pos_for_few_genres": "Disable saving current video time for music:"
+  "preferences_enable_exclude_save_player_pos_for_few_genres": "Disable saving current video time for music: ",
+  "preferences_always_loop_playlist": "Always loop playlist, currently works only for playlists with up to 50 videos: "
 }

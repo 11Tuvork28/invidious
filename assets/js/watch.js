@@ -149,8 +149,10 @@ function get_playlist(plid, retries) {
         if (xhr.readyState == 4) {
             if (xhr.status == 200) {
                 playlist.innerHTML = xhr.response.playlistHtml;
-                var nextVideo = document.getElementById(xhr.response.nextVideo);
-                nextVideo.parentNode.parentNode.scrollTop = nextVideo.offsetTop;
+                if (xhr.response.nextVideo != null) {
+                   var nextVideo = document.getElementById(xhr.response.nextVideo);
+                   nextVideo.parentNode.parentNode.scrollTop = nextVideo.offsetTop;
+                ]
 
                 if (xhr.response.nextVideo) {
                     player.on('ended', function () {
@@ -179,7 +181,12 @@ function get_playlist(plid, retries) {
 
                         location.assign(url.pathname + url.search);
                     });
-                }
+                }  else if (video_data.params.always_loop_playlist) {
+         	    player.on("ended", function () {
+            	        location.assign(
+                        document.getElementById("playlist").childNodes[2].childNodes[1].childNodes[1].childNodes[1].href);
+                    });
+       	       }
             } else {
                 playlist.innerHTML = '';
                 document.getElementById('continue').style.display = '';
