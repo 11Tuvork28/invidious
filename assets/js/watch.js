@@ -152,7 +152,7 @@ function get_playlist(plid, retries) {
                 if (xhr.response.nextVideo != null) {
                    var nextVideo = document.getElementById(xhr.response.nextVideo);
                    nextVideo.parentNode.parentNode.scrollTop = nextVideo.offsetTop;
-                ]
+                }
 
                 if (xhr.response.nextVideo) {
                     player.on('ended', function () {
