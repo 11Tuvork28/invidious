@@ -180,11 +180,12 @@ module Invidious::Routes::PreferencesRoute
       save_player_pos:             save_player_pos,
       enable_exclude_save_player_pos_for_few_genres: enable_exclude_save_player_pos_for_few_genres,
       always_loop_playlist:        always_loop_playlist
-    }.to_json).to_json
+    }.to_json)
 
     if user = env.get? "user"
       user = user.as(User)
-      PG_DB.exec("UPDATE users SET preferences = $1 WHERE email = $2", preferences, user.email)
+      user.preferences = preferences
+      Invidious::Database::Users.update_preferences(user)
 
       if CONFIG.admins.includes? user.email
         CONFIG.default_user_preferences.default_home = env.params.body["admin_default_home"]?.try &.as(String) || CONFIG.default_user_preferences.default_home
@@ -230,10 +231,10 @@ module Invidious::Routes::PreferencesRoute
       end
 
       if CONFIG.domain
-        env.response.cookies["PREFS"] = HTTP::Cookie.new(name: "PREFS", domain: "#{CONFIG.domain}", value: URI.encode_www_form(preferences), expires: Time.utc + 2.years,
+        env.response.cookies["PREFS"] = HTTP::Cookie.new(name: "PREFS", domain: "#{CONFIG.domain}", value: URI.encode_www_form(preferences.to_json), expires: Time.utc + 2.years,
           secure: secure, http_only: true)
       else
-        env.response.cookies["PREFS"] = HTTP::Cookie.new(name: "PREFS", value: URI.encode_www_form(preferences), expires: Time.utc + 2.years,
+        env.response.cookies["PREFS"] = HTTP::Cookie.new(name: "PREFS", value: URI.encode_www_form(preferences.to_json), expires: Time.utc + 2.years,
           secure: secure, http_only: true)
       end
     end
@@ -251,18 +252,15 @@ module Invidious::Routes::PreferencesRoute
 
     if user = env.get? "user"
       user = user.as(User)
-      preferences = user.preferences
 
-      case preferences.dark_mode
+      case user.preferences.dark_mode
       when "dark"
-        preferences.dark_mode = "light"
+        user.preferences.dark_mode = "light"
       else
-        preferences.dark_mode = "dark"
+        user.preferences.dark_mode = "dark"
       end
 
-      preferences = preferences.to_json
-
-      PG_DB.exec("UPDATE users SET preferences = $1 WHERE email = $2", preferences, user.email)
+      Invidious::Database::Users.update_preferences(user)
     else
       preferences = env.get("preferences").as(Preferences)
 
