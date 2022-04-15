@@ -1174,7 +1174,7 @@ def process_video_params(query, preferences)
   vr_mode = query["vr_mode"]?.try { |q| (q == "true" || q == "1").to_unsafe }
   save_player_pos = query["save_player_pos"]?.try { |q| (q == "true" || q == "1").to_unsafe }
   enable_exclude_save_player_pos_for_few_genres = query["enable_exclude_save_player_pos_for_few_genres"]?.try { |q| (q == "true" || q == "1").to_unsafe }
-  always_loop_playlist  = query["always_loop_playlist"]?.try { |q| (q == "true" || q == "1").to_unsafe }
+  always_loop_playlist = query["always_loop_playlist"]?.try { |q| (q == "true" || q == "1").to_unsafe }
 
   if preferences
     # region ||= preferences.region
@@ -1218,8 +1218,8 @@ def process_video_params(query, preferences)
   volume ||= CONFIG.default_user_preferences.volume
   vr_mode ||= CONFIG.default_user_preferences.vr_mode.to_unsafe
   save_player_pos ||= CONFIG.default_user_preferences.save_player_pos.to_unsafe
-  enable_exclude_save_player_pos_for_few_genres ||=  CONFIG.default_user_preferences.enable_exclude_save_player_pos_for_few_genres.to_unsafe
-  always_loop_playlist  ||=  CONFIG.default_user_preferences.always_loop_playlist.to_unsafe
+  enable_exclude_save_player_pos_for_few_genres ||= CONFIG.default_user_preferences.enable_exclude_save_player_pos_for_few_genres.to_unsafe
+  always_loop_playlist ||= CONFIG.default_user_preferences.always_loop_playlist.to_unsafe
 
   annotations = annotations == 1
   autoplay = autoplay == 1
@@ -1286,7 +1286,7 @@ def process_video_params(query, preferences)
     vr_mode:            vr_mode,
     save_player_pos:    save_player_pos,
     enable_exclude_save_player_pos_for_few_genres: enable_exclude_save_player_pos_for_few_genres,
-    always_loop_playlist: always_loop_playlist,
+    always_loop_playlist:                         always_loop_playlist,
   })
 
   return params
