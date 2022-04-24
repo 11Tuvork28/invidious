@@ -62,6 +62,42 @@ videojs.Vhs.xhr.beforeRequest = function (options) {
 
 var player = videojs("player", options);
 
+player.on('error', () => {
+    if (video_data.params.quality !== 'dash') {
+        if (!player.currentSrc().includes("local=true") && !video_data.local_disabled) {
+            var currentSources = player.currentSources();
+            for (var i = 0; i < currentSources.length; i++) {
+                currentSources[i]["src"] += "&local=true"
+            }
+            player.src(currentSources)
+        }
+        else if (player.error().code === 2 || player.error().code === 4) {
+            setTimeout(function (event) {
+                console.log('An error occurred in the player, reloading...');
+    
+                var currentTime = player.currentTime();
+                var playbackRate = player.playbackRate();
+                var paused = player.paused();
+    
+                player.load();
+    
+                if (currentTime > 0.5) currentTime -= 0.5;
+    
+                player.currentTime(currentTime);
+                player.playbackRate(playbackRate);
+    
+                if (!paused) player.play();
+            }, 10000);
+        }
+    }
+});
+
+if (video_data.params.quality == 'dash') {
+    player.reloadSourceOnError({
+        errorInterval: 10
+    });
+}
+
 /**
  * Function for add time argument to url
  * @param {String} url
@@ -184,27 +220,6 @@ if (isMobile()) {
   });
 }
 
-player.on("error", function (event) {
-  if (player.error().code === 2 || player.error().code === 4) {
-    setTimeout(function (event) {
-      console.log("An error occurred in the player, reloading...");
-
-      var currentTime = player.currentTime();
-      var playbackRate = player.playbackRate();
-      var paused = player.paused();
-
-      player.load();
-
-      if (currentTime > 0.5) currentTime -= 0.5;
-
-      player.currentTime(currentTime);
-      player.playbackRate(playbackRate);
-
-      if (!paused) player.play();
-    }, 5000);
-  }
-});
-
 // Enable VR video support
 if (!video_data.params.listen && video_data.vr && video_data.params.vr_mode) {
   player.crossOrigin("anonymous");
@@ -241,15 +256,73 @@ if (video_data.params.video_start > 0 || video_data.params.video_end > 0) {
 player.volume(video_data.params.volume / 100);
 player.playbackRate(video_data.params.speed);
 
-player.on("waiting", function () {
-  if (
-    player.playbackRate() > 1 &&
-    player.liveTracker.isLive() &&
-    player.liveTracker.atLiveEdge()
-  ) {
-    console.log("Player has caught up to source, resetting playbackRate.");
-    player.playbackRate(1);
-  }
+/**
+ * Method for getting the contents of a cookie
+ *
+ * @param {String} name Name of cookie
+ * @returns cookieValue
+ */
+function getCookieValue(name) {
+    var value = document.cookie.split(";").filter(item => item.includes(name + "="));
+
+    return (value != null && value.length >= 1)
+        ? value[0].substring((name + "=").length, value[0].length)
+        : null;
+}
+
+/**
+ * Method for updating the "PREFS" cookie (or creating it if missing)
+ *
+ * @param {number} newVolume New volume defined (null if unchanged)
+ * @param {number} newSpeed New speed defined (null if unchanged)
+ */
+function updateCookie(newVolume, newSpeed) {
+    var volumeValue = newVolume != null ? newVolume : video_data.params.volume;
+    var speedValue = newSpeed != null ? newSpeed : video_data.params.speed;
+
+    var cookieValue = getCookieValue('PREFS');
+    var cookieData;
+
+    if (cookieValue != null) {
+        var cookieJson = JSON.parse(decodeURIComponent(cookieValue));
+        cookieJson.volume = volumeValue;
+        cookieJson.speed = speedValue;
+        cookieData = encodeURIComponent(JSON.stringify(cookieJson));
+    } else {
+        cookieData = encodeURIComponent(JSON.stringify({ 'volume': volumeValue, 'speed': speedValue }));
+    }
+
+    // Set expiration in 2 year
+    var date = new Date();
+    date.setTime(date.getTime() + 63115200);
+
+    var ipRegex = /^((\d+\.){3}\d+|[A-Fa-f0-9]*:[A-Fa-f0-9:]*:[A-Fa-f0-9:]+)$/;
+    var domainUsed = window.location.hostname;
+
+    // Fix for a bug in FF where the leading dot in the FQDN is not ignored
+    if (domainUsed.charAt(0) != '.' && !ipRegex.test(domainUsed) && domainUsed != 'localhost')
+        domainUsed = '.' + window.location.hostname;
+
+    document.cookie = 'PREFS=' + cookieData + '; SameSite=Strict; path=/; domain=' +
+        domainUsed + '; expires=' + date.toGMTString() + ';';
+
+    video_data.params.volume = volumeValue;
+    video_data.params.speed = speedValue;
+}
+
+player.on('ratechange', function () {
+    updateCookie(null, player.playbackRate());
+});
+
+player.on('volumechange', function () {
+    updateCookie(Math.ceil(player.volume() * 100), null);
+});
+
+player.on('waiting', function () {
+    if (player.playbackRate() > 1 && player.liveTracker.isLive() && player.liveTracker.atLiveEdge()) {
+        console.log('Player has caught up to source, resetting playbackRate.')
+        player.playbackRate(1);
+    }
 });
 
 if (
@@ -778,34 +851,28 @@ if (player_data.preferred_caption_found) {
 
 // Safari audio double duration fix
 if (navigator.vendor == "Apple Computer, Inc." && video_data.params.listen) {
-  player.on("loadedmetadata", function () {
-    player.on("timeupdate", function () {
-      if (player.remainingTime() < player.duration() / 2) {
-        player.currentTime(player.duration() + 1);
-      }
-    });
-  });
+    player.on('loadedmetadata', function () {
+        player.on('timeupdate', function () {
+            if (player.remainingTime() < player.duration() / 2 && player.remainingTime() >= 2) {
+                player.currentTime(player.duration() - 1);
+            }
+        });
+     });
 }
 
 // Watch on Invidious link
 if (window.location.pathname.startsWith("/embed/")) {
-  const Button = videojs.getComponent("Button");
-  let watch_on_invidious_button = new Button(player);
+    const Button = videojs.getComponent('Button');
+    let watch_on_invidious_button = new Button(player);
 
-  // Create hyperlink for current instance
-  redirect_element = document.createElement("a");
-  redirect_element.setAttribute(
-    "href",
-    `http://${window.location.host}/watch?v=${window.location.pathname.replace(
-      "/embed/",
-      ""
-    )}`
-  );
-  redirect_element.appendChild(document.createTextNode("Invidious"));
+    // Create hyperlink for current instance
+    redirect_element = document.createElement("a");
+    redirect_element.setAttribute("href", `//${window.location.host}/watch?v=${window.location.pathname.replace("/embed/","")}`)
+    redirect_element.appendChild(document.createTextNode("Invidious"))
 
-  watch_on_invidious_button.el().appendChild(redirect_element);
-  watch_on_invidious_button.addClass("watch-on-invidious");
+    watch_on_invidious_button.el().appendChild(redirect_element)
+    watch_on_invidious_button.addClass("watch-on-invidious")
 
-  cb = player.getChild("ControlBar");
-  cb.addChild(watch_on_invidious_button);
-}
+    cb = player.getChild('ControlBar')
+    cb.addChild(watch_on_invidious_button)
+};
