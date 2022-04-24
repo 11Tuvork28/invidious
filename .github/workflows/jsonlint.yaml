@@ -1,0 +1,19 @@
+name: Jsonlint-CI
+on:
+  push:
+    branches:
+    - master
+jobs:
+  lintJson:
+    runs-on: ubuntu-latest
+    container:
+      image: ixxel/unit-tests-alpine:latest
+    steps:
+    - name: Git clone repo
+      uses: actions/checkout@v2
+    - name: Jsonlint scan
+      uses: ixxeL-actions/jsonlint@main
+      with:
+        extensions: '"json"'
+        fix: 'true'
+        working-dir: ./locales/*
