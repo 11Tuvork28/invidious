@@ -13,20 +13,23 @@
     // For dynamically inserted elements
     document.addEventListener('click', function (e) {
         if (!e || !e.target) { return; }
-        e = e.target;
-        var handler_name = e.getAttribute('data-onclick');
+
+        var t = e.target;
+        var handler_name = t.getAttribute('data-onclick');
+
         switch (handler_name) {
             case 'jump_to_time':
-                var time = e.getAttribute('data-jump-time');
+                e.preventDefault();
+                var time = t.getAttribute('data-jump-time');
                 player.currentTime(time);
                 break;
             case 'get_youtube_replies':
-                var load_more = e.getAttribute('data-load-more') !== null;
-                var load_replies = e.getAttribute('data-load-replies') !== null;
-                get_youtube_replies(e, load_more, load_replies);
+                var load_more = t.getAttribute('data-load-more') !== null;
+                var load_replies = t.getAttribute('data-load-replies') !== null;
+                get_youtube_replies(t, load_more, load_replies);
                 break;
             case 'toggle_parent':
-                toggle_parent(e);
+                toggle_parent(t);
                 break;
             default:
                 break;
@@ -76,7 +79,7 @@
     });
 
     n2a(document.querySelectorAll('[data-onrange="update_volume_value"]')).forEach(function (e) {
-        var cb = function () { update_volume_value(e); }
+        var cb = function () { update_volume_value(e); };
         e.oninput = cb;
         e.onchange = cb;
     });
@@ -102,13 +105,13 @@
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
         xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
-                if (xhr.status != 200) {
+            if (xhr.readyState === 4) {
+                if (xhr.status !== 200) {
                     count.innerText = parseInt(count.innerText) + 1;
                     row.style.display = '';
                 }
             }
-        }
+        };
 
         var csrf_token = target.parentNode.querySelector('input[name="csrf_token"]').value;
         xhr.send('csrf_token=' + csrf_token);
@@ -131,20 +134,20 @@
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
         xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
-                if (xhr.status != 200) {
+            if (xhr.readyState === 4) {
+                if (xhr.status !== 200) {
                     count.innerText = parseInt(count.innerText) + 1;
                     row.style.display = '';
                 }
             }
-        }
+        };
 
         var csrf_token = target.parentNode.querySelector('input[name="csrf_token"]').value;
         xhr.send('csrf_token=' + csrf_token);
     }
 
     // Handle keypresses
-    window.addEventListener('keydown', (event) => {
+    window.addEventListener('keydown', function (event) {
         // Ignore modifier keys
         if (event.ctrlKey || event.metaKey) return;
 
@@ -152,14 +155,14 @@
         let focused_tag = document.activeElement.tagName.toLowerCase();
         const allowed = /^(button|checkbox|file|radio|submit)$/;
 
-        if (focused_tag === "textarea") return;
-        if (focused_tag === "input") {
+        if (focused_tag === 'textarea') return;
+        if (focused_tag === 'input') {
             let focused_type = document.activeElement.type.toLowerCase();
             if (!focused_type.match(allowed)) return;
         }
 
         // Focus search bar on '/'
-        if (event.key == "/") {
+        if (event.key === '/') {
             document.getElementById('searchbox').focus();
             event.preventDefault();
         }
