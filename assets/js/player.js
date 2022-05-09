@@ -533,7 +533,6 @@ function set_all_video_times(times) {
             storage.removeItem(save_player_pos_key);
         }
     }
-  }
 }
 
 function get_all_video_times() {
@@ -546,7 +545,6 @@ function get_all_video_times() {
                 console.warn('get_all_video_times: ' + e);
             }
         }
-    }
   }
   return {};
 }
@@ -810,9 +808,6 @@ window.addEventListener('keydown', function (e) {
             }
         }
       }
-    }
-  };
-
     player.on('mousewheel', mouseScroll);
     player.on('DOMMouseScroll', mouseScroll);
 }());
