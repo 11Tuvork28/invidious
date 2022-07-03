@@ -481,7 +481,7 @@ def template_reddit_comments(root, locale)
 
         html << <<-END_HTML
         <p>
-          <a href="javascript:void(0)" data-onclick="toggle_parent">[ - ]</a>
+          <a href="javascript:void(0)" data-onclick="toggle_parent">[ − ]</a>
           <b><a href="https://www.reddit.com/user/#{child.author}">#{child.author}</a></b>
           #{translate_count(locale, "comments_points_count", child.score, NumberFormatting::Separator)}
           <span title="#{child.created_utc.to_s(translate(locale, "%a %B %-d %T %Y UTC"))}">#{translate(locale, "`x` ago", recode_date(child.created_utc, locale))}</span>
@@ -500,6 +500,12 @@ def template_reddit_comments(root, locale)
 end
 
 def replace_links(html)
+  # Check if the document is empty
+  # Prevents edge-case bug with Reddit comments, see issue #3115
+  if html.nil? || html.empty?
+    return html
+  end
+
   html = XML.parse_html(html)
 
   html.xpath_nodes(%q(//a)).each do |anchor|
@@ -541,6 +547,12 @@ def replace_links(html)
 end
 
 def fill_links(html, scheme, host)
+  # Check if the document is empty
+  # Prevents edge-case bug with Reddit comments, see issue #3115
+  if html.nil? || html.empty?
+    return html
+  end
+
   html = XML.parse_html(html)
 
   html.xpath_nodes("//a").each do |match|
@@ -560,6 +572,48 @@ def fill_links(html, scheme, host)
   return html.to_xml(options: XML::SaveOptions::NO_DECL)
 end
 
+def text_to_parsed_content(text : String) : JSON::Any
+  nodes = [] of JSON::Any
+  # For each line convert line to array of nodes
+  text.split('\n').each do |line|
+    # In first case line is just a simple node before
+    # check patterns inside line
+    # { 'text': line }
+    currentNodes = [] of JSON::Any
+    initialNode = {"text" => line}
+    currentNodes << (JSON.parse(initialNode.to_json))
+
+    # For each match with url pattern, get last node and preserve
+    # last node before create new node with url information
+    # { 'text': match, 'navigationEndpoint': { 'urlEndpoint' : 'url': match } }
+    line.scan(/https?:\/\/[^ ]*/).each do |urlMatch|
+      # Retrieve last node and update node without match
+      lastNode = currentNodes[currentNodes.size - 1].as_h
+      splittedLastNode = lastNode["text"].as_s.split(urlMatch[0])
+      lastNode["text"] = JSON.parse(splittedLastNode[0].to_json)
+      currentNodes[currentNodes.size - 1] = JSON.parse(lastNode.to_json)
+      # Create new node with match and navigation infos
+      currentNode = {"text" => urlMatch[0], "navigationEndpoint" => {"urlEndpoint" => {"url" => urlMatch[0]}}}
+      currentNodes << (JSON.parse(currentNode.to_json))
+      # If text remain after match create new simple node with text after match
+      afterNode = {"text" => splittedLastNode.size > 0 ? splittedLastNode[1] : ""}
+      currentNodes << (JSON.parse(afterNode.to_json))
+    end
+
+    # After processing of matches inside line
+    # Add \n at end of last node for preserve carriage return
+    lastNode = currentNodes[currentNodes.size - 1].as_h
+    lastNode["text"] = JSON.parse("#{currentNodes[currentNodes.size - 1]["text"]}\n".to_json)
+    currentNodes[currentNodes.size - 1] = JSON.parse(lastNode.to_json)
+
+    # Finally add final nodes to nodes returned
+    currentNodes.each do |node|
+      nodes << (node)
+    end
+  end
+  return JSON.parse({"runs" => nodes}.to_json)
+end
+
 def parse_content(content : JSON::Any, video_id : String? = "") : String
   content["simpleText"]?.try &.as_s.rchop('\ufeff').try { |b| HTML.escape(b) }.to_s ||
     content["runs"]?.try &.as_a.try { |r| content_to_comment_html(r, video_id).try &.to_s.gsub("\n", "<br>") } || ""
@@ -567,6 +621,10 @@ end
 
 def content_to_comment_html(content, video_id : String? = "")
   html_array = content.map do |run|
+    # Sometimes, there is an empty element.
+    # See: https://github.com/iv-org/invidious/issues/3096
+    next if run.as_h.empty?
+
     text = HTML.escape(run["text"].as_s)
 
     if run["navigationEndpoint"]?
