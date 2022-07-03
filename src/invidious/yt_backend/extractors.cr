@@ -417,7 +417,7 @@ private module Extractors
   #     {"tabRenderer":  {
   #       "endpoint": {...}
   #       "title": "Playlists",
-  #       "selected": true, # Is nil unless tab is selected  
+  #       "selected": true, # Is nil unless tab is selected
   #       "content": {...},
   #       ...
   #     }}
