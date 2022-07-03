@@ -18,8 +18,6 @@ def fetch_channel_community(ucid, continuation, locale, format, thin_mode)
     if !body
       raise InfoException.new("Could not extract community tab.")
     end
-
-    body = body["tabRenderer"]["content"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]
   else
     continuation = produce_channel_community_continuation(ucid, continuation)
 
