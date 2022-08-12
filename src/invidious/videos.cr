@@ -325,7 +325,7 @@ struct Video
 
       json.field "viewCount", self.views
       json.field "likeCount", self.likes
-      json.field "dislikeCount", self.dislikes
+      json.field "dislikeCount", 0_i64
 
       json.field "paid", self.paid
       json.field "premium", self.premium
@@ -356,7 +356,7 @@ struct Video
 
       json.field "lengthSeconds", self.length_seconds
       json.field "allowRatings", self.allow_ratings
-      json.field "rating", self.average_rating
+      json.field "rating", 0_i64
       json.field "isListed", self.is_listed
       json.field "liveNow", self.live_now
       json.field "isUpcoming", self.is_upcoming
@@ -556,11 +556,6 @@ struct Video
 
   def dislikes : Int64
     info["dislikes"]?.try &.as_i64 || 0_i64
-  end
-
-  def average_rating : Float64
-    # (likes / (likes + dislikes) * 4 + 1)
-    info["videoDetails"]["averageRating"]?.try { |t| t.as_f? || t.as_i64?.try &.to_f64 }.try &.round(4) || 0.0
   end
 
   def published : Time
@@ -815,14 +810,6 @@ struct Video
     return info.dig?("streamingData", "adaptiveFormats", 0, "projectionType").try &.as_s
   end
 
-  def wilson_score : Float64
-    ci_lower_bound(likes, likes + dislikes).round(4)
-  end
-
-  def engagement : Float64
-    (((likes + dislikes) / views) * 100).round(4)
-  end
-
   def reason : String?
     info["reason"]?.try &.as_s
   end
@@ -901,36 +888,46 @@ def parse_related_video(related : JSON::Any) : Hash(String, JSON::Any)?
 end
 
 def extract_video_info(video_id : String, proxy_region : String? = nil, context_screen : String? = nil)
-  params = {} of String => JSON::Any
-
+  # Init client config for the API
   client_config = YoutubeAPI::ClientConfig.new(proxy_region: proxy_region)
   if context_screen == "embed"
     client_config.client_type = YoutubeAPI::ClientType::TvHtml5ScreenEmbed
   end
 
+  # Fetch data from the player endpoint
   player_response = YoutubeAPI.player(video_id: video_id, params: "", client_config: client_config)
 
-  if player_response.dig?("playabilityStatus", "status").try &.as_s != "OK"
+  playability_status = player_response.dig?("playabilityStatus", "status").try &.as_s
+
+  if playability_status != "OK"
     subreason = player_response.dig?("playabilityStatus", "errorScreen", "playerErrorMessageRenderer", "subreason")
     reason = subreason.try &.[]?("simpleText").try &.as_s
     reason ||= subreason.try &.[]("runs").as_a.map(&.[]("text")).join("")
     reason ||= player_response.dig("playabilityStatus", "reason").as_s
-    params["reason"] = JSON::Any.new(reason)
-    return params
+
+    # Stop here if video is not a scheduled livestream
+    if playability_status != "LIVE_STREAM_OFFLINE"
+      return {
+        "reason" => JSON::Any.new(reason),
+      }
+    end
+  else
+    reason = nil
   end
 
-  params["shortDescription"] = player_response.dig?("videoDetails", "shortDescription") || JSON::Any.new(nil)
-
   # Don't fetch the next endpoint if the video is unavailable.
-  if !params["reason"]?
+  if {"OK", "LIVE_STREAM_OFFLINE"}.any?(playability_status)
     next_response = YoutubeAPI.next({"videoId": video_id, "params": ""})
     player_response = player_response.merge(next_response)
   end
 
+  params = parse_video_info(video_id, player_response)
+  params["reason"] = JSON::Any.new(reason) if reason
+
   # Fetch the video streams using an Android client in order to get the decrypted URLs and
   # maybe fix throttling issues (#2194).See for the explanation about the decrypted URLs:
   # https://github.com/TeamNewPipe/NewPipeExtractor/issues/562
-  if !params["reason"]?
+  if reason.nil?
     if context_screen == "embed"
       client_config.client_type = YoutubeAPI::ClientType::AndroidScreenEmbed
     else
@@ -948,10 +945,15 @@ def extract_video_info(video_id : String, proxy_region : String? = nil, context_
     end
   end
 
+  # TODO: clean that up
   {"captions", "microformat", "playabilityStatus", "storyboards", "videoDetails"}.each do |f|
     params[f] = player_response[f] if player_response[f]?
   end
 
+  return params
+end
+
+def parse_video_info(video_id : String, player_response : Hash(String, JSON::Any)) : Hash(String, JSON::Any)
   # Top level elements
 
   main_results = player_response.dig?("contents", "twoColumnWatchNextResults")
@@ -1005,9 +1007,7 @@ def extract_video_info(video_id : String, proxy_region : String? = nil, context_
     end
   end
 
-  params["relatedVideos"] = JSON::Any.new(related)
-
-  # Likes/dislikes
+  # Likes
 
   toplevel_buttons = video_primary_renderer
     .try &.dig?("videoActions", "menuRenderer", "topLevelButtons")
@@ -1025,37 +1025,14 @@ def extract_video_info(video_id : String, proxy_region : String? = nil, context_
       LOGGER.trace("extract_video_info: Found \"likes\" button. Button text is \"#{likes_txt}\"")
       LOGGER.debug("extract_video_info: Likes count is #{likes}") if likes
     end
-
-    dislikes_button = toplevel_buttons.as_a
-      .find(&.dig("toggleButtonRenderer", "defaultIcon", "iconType").as_s.== "DISLIKE")
-      .try &.["toggleButtonRenderer"]
-
-    if dislikes_button
-      dislikes_txt = (dislikes_button["defaultText"]? || dislikes_button["toggledText"]?)
-        .try &.dig?("accessibility", "accessibilityData", "label")
-      dislikes = dislikes_txt.as_s.gsub(/\D/, "").to_i64? if dislikes_txt
-
-      LOGGER.trace("extract_video_info: Found \"dislikes\" button. Button text is \"#{dislikes_txt}\"")
-      LOGGER.debug("extract_video_info: Dislikes count is #{dislikes}") if dislikes
-    end
   end
-
-  if likes && likes != 0_i64 && (!dislikes || dislikes == 0_i64)
-    if rating = player_response.dig?("videoDetails", "averageRating").try { |x| x.as_i64? || x.as_f? }
-      dislikes = (likes * ((5 - rating)/(rating - 1))).round.to_i64
-      LOGGER.debug("extract_video_info: Dislikes count (using fallback method) is #{dislikes}")
-    end
-  end
-
-  params["likes"] = JSON::Any.new(likes || 0_i64)
-  params["dislikes"] = JSON::Any.new(dislikes || 0_i64)
 
   # Description
 
+  short_description = player_response.dig?("videoDetails", "shortDescription")
+
   description_html = video_secondary_renderer.try &.dig?("description", "runs")
     .try &.as_a.try { |t| content_to_comment_html(t, video_id) }
-
-  params["descriptionHtml"] = JSON::Any.new(description_html || "<p></p>")
 
   # Video metadata
 
@@ -1063,26 +1040,23 @@ def extract_video_info(video_id : String, proxy_region : String? = nil, context_
     .try &.dig?("metadataRowContainer", "metadataRowContainerRenderer", "rows")
       .try &.as_a
 
-  params["genre"] = params["microformat"]?.try &.["playerMicroformatRenderer"]?.try &.["category"]? || JSON::Any.new("")
-  params["genreUrl"] = JSON::Any.new(nil)
+  genre = player_response.dig?("microformat", "playerMicroformatRenderer", "category")
+  genre_ucid = nil
+  license = nil
 
   metadata.try &.each do |row|
-    title = row["metadataRowRenderer"]?.try &.["title"]?.try &.["simpleText"]?.try &.as_s
+    metadata_title = row.dig?("metadataRowRenderer", "title", "simpleText").try &.as_s
     contents = row.dig?("metadataRowRenderer", "contents", 0)
 
-    if title.try &.== "Category"
+    if metadata_title == "Category"
       contents = contents.try &.dig?("runs", 0)
 
-      params["genre"] = JSON::Any.new(contents.try &.["text"]?.try &.as_s || "")
-      params["genreUcid"] = JSON::Any.new(contents.try &.["navigationEndpoint"]?.try &.["browseEndpoint"]?
-        .try &.["browseId"]?.try &.as_s || "")
-    elsif title.try &.== "License"
-      contents = contents.try &.["runs"]?
-        .try &.as_a[0]?
-
-      params["license"] = JSON::Any.new(contents.try &.["text"]?.try &.as_s || "")
-    elsif title.try &.== "Licensed to YouTube by"
-      params["license"] = JSON::Any.new(contents.try &.["simpleText"]?.try &.as_s || "")
+      genre = contents.try &.["text"]?
+      genre_ucid = contents.try &.dig?("navigationEndpoint", "browseEndpoint", "browseId")
+    elsif metadata_title == "License"
+      license = contents.try &.dig?("runs", 0, "text")
+    elsif metadata_title == "Licensed to YouTube by"
+      license = contents.try &.["simpleText"]?
     end
   end
 
@@ -1090,19 +1064,29 @@ def extract_video_info(video_id : String, proxy_region : String? = nil, context_
 
   if author_info = video_secondary_renderer.try &.dig?("owner", "videoOwnerRenderer")
     author_thumbnail = author_info.dig?("thumbnail", "thumbnails", 0, "url")
-    params["authorThumbnail"] = JSON::Any.new(author_thumbnail.try &.as_s || "")
-
     author_verified = has_verified_badge?(author_info["badges"]?)
-    params["authorVerified"] = JSON::Any.new(author_verified)
 
     subs_text = author_info["subscriberCountText"]?
       .try { |t| t["simpleText"]? || t.dig?("runs", 0, "text") }
       .try &.as_s.split(" ", 2)[0]
-
-    params["subCountText"] = JSON::Any.new(subs_text || "-")
   end
 
   # Return data
+
+  params = {
+    "shortDescription" => JSON::Any.new(short_description.try &.as_s || nil),
+    "relatedVideos"    => JSON::Any.new(related),
+    "likes"            => JSON::Any.new(likes || 0_i64),
+    "dislikes"         => JSON::Any.new(0_i64),
+    "descriptionHtml"  => JSON::Any.new(description_html || "<p></p>"),
+    "genre"            => JSON::Any.new(genre.try &.as_s || ""),
+    "genreUrl"         => JSON::Any.new(nil),
+    "genreUcid"        => JSON::Any.new(genre_ucid.try &.as_s || ""),
+    "license"          => JSON::Any.new(license.try &.as_s || ""),
+    "authorThumbnail"  => JSON::Any.new(author_thumbnail.try &.as_s || ""),
+    "authorVerified"   => JSON::Any.new(author_verified),
+    "subCountText"     => JSON::Any.new(subs_text || "-"),
+  }
 
   return params
 end
@@ -1160,7 +1144,11 @@ def fetch_video(id, region)
   end
 
   if reason = info["reason"]?
-    raise InfoException.new(reason.as_s || "")
+    if reason == "Video unavailable"
+      raise NotFoundException.new(reason.as_s || "")
+    else
+      raise InfoException.new(reason.as_s || "")
+    end
   end
 
   video = Video.new({

@@ -150,6 +150,8 @@ module Invidious::Routes::Feeds
       channel = get_about_info(ucid, locale)
     rescue ex : ChannelRedirect
       return env.redirect env.request.resource.gsub(ucid, ex.channel_id)
+    rescue ex : NotFoundException
+      return error_atom(404, ex)
     rescue ex
       return error_atom(500, ex)
     end
@@ -200,6 +202,12 @@ module Invidious::Routes::Feeds
         xml.element("author") do
           xml.element("name") { xml.text channel.author }
           xml.element("uri") { xml.text "#{HOST_URL}/channel/#{channel.ucid}" }
+        end
+
+        xml.element("image") do
+          xml.element("url") { xml.text channel.author_thumbnail }
+          xml.element("title") { xml.text channel.author }
+          xml.element("link", rel: "self", href: "#{HOST_URL}#{env.request.resource}")
         end
 
         videos.each do |video|
