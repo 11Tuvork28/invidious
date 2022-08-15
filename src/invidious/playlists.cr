@@ -127,7 +127,7 @@ struct Playlist
         json.array do
           videos = get_playlist_videos(self, offset: offset, video_id: video_id)
           if _shuffle_videos
-            videos.shuffle
+            videos = videos.shuffle
           end
           videos.each do |video|
             video.to_json(json)
@@ -206,7 +206,7 @@ struct InvidiousPlaylist
 
           videos = get_playlist_videos(self, offset: offset, video_id: video_id)
           if _shuffle_videos
-            videos.shuffle
+            videos = videos.shuffle
           end
           videos.each_with_index do |video, idx|
             video.to_json(json, offset + idx)

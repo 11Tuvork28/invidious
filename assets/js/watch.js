@@ -117,7 +117,7 @@ function get_playlist(plid) {
             '?index=' + video_data.index +
             '&continuation=' + video_data.id +
             '&format=html&hl=' + video_data.preferences.locale +
-            '&shuffle=' + video_data.params.always_shuffle_playlist? 0 : 1;
+            '&shuffle=' + video_data.params.always_shuffle_playlist;
     }
 
     helpers.xhr('GET', plid_url, {retries: 5, entity_name: 'playlist'}, {
