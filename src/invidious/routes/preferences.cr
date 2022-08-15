@@ -184,7 +184,7 @@ module Invidious::Routes::PreferencesRoute
       show_nick:                                     show_nick,
       save_player_pos:                               save_player_pos,
       enable_exclude_save_player_pos_for_few_genres: enable_exclude_save_player_pos_for_few_genres,
-      always_shuffle_playlist:                          always_shuffle_playlist,
+      always_shuffle_playlist:                       always_shuffle_playlist,
     }.to_json)
 
     if user = env.get? "user"

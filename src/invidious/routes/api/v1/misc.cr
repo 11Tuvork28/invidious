@@ -46,7 +46,7 @@ module Invidious::Routes::API::V1::Misc
     # includes into the playlist a maximum of 20 videos, before the offset
     if offset > 0
       lookback = offset < 50 ? offset : 50
-      response = playlist.to_json(offset - lookback,shuffle_videos)
+      response = playlist.to_json(offset - lookback, shuffle_videos)
       json_response = JSON.parse(response)
     else
       #  Unless the continuation is really the offset 0, it becomes expensive.
@@ -61,7 +61,7 @@ module Invidious::Routes::API::V1::Misc
       if json_response["videos"].as_a[0]["index"] != offset
         offset = json_response["videos"].as_a[0]["index"].as_i
         lookback = offset < 50 ? offset : 50
-        response = playlist.to_json(offset - lookback,shuffle_videos)
+        response = playlist.to_json(offset - lookback, shuffle_videos)
         json_response = JSON.parse(response)
       end
     end

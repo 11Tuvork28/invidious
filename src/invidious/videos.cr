@@ -1311,7 +1311,7 @@ def process_video_params(query, preferences)
     vr_mode:                                       vr_mode,
     save_player_pos:                               save_player_pos,
     enable_exclude_save_player_pos_for_few_genres: enable_exclude_save_player_pos_for_few_genres,
-    always_shuffle_playlist:                          always_shuffle_playlist,
+    always_shuffle_playlist:                       always_shuffle_playlist,
   })
 
   return params
