@@ -17,6 +17,7 @@ module Invidious::Routes::API::V1::Misc
     env.response.content_type = "application/json"
     plid = env.params.url["plid"]
     shuffle_videos = env.params.query["shuffle"]?.try { |s| (s == "true" || s == "1").to_unsafe }
+    shuffle_videos = shuffle_videos == 1
     offset = env.params.query["index"]?.try &.to_i?
     offset ||= env.params.query["page"]?.try &.to_i?.try { |page| (page - 1) * 100 }
     offset ||= 0
