@@ -16,7 +16,7 @@ module Invidious::Routes::API::V1::Misc
   def self.get_playlist(env : HTTP::Server::Context)
     env.response.content_type = "application/json"
     plid = env.params.url["plid"]
-    shuffle_videos = env.params.query["shuffle"]?.try &.as_bool
+    shuffle_videos = env.params.query["shuffle"]?.try { |s| (s == "true" || s == "1").to_unsafe }
     offset = env.params.query["index"]?.try &.to_i?
     offset ||= env.params.query["page"]?.try &.to_i?.try { |page| (page - 1) * 100 }
     offset ||= 0
@@ -29,6 +29,7 @@ module Invidious::Routes::API::V1::Misc
     if plid.starts_with? "RD"
       return env.redirect "/api/v1/mixes/#{plid}"
     end
+
 
     begin
       playlist = get_playlist(plid)
