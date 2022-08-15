@@ -30,7 +30,6 @@ module Invidious::Routes::API::V1::Misc
       return env.redirect "/api/v1/mixes/#{plid}"
     end
 
-
     begin
       playlist = get_playlist(plid)
     rescue ex : InfoException
