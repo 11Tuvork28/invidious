@@ -1,6 +1,6 @@
 { 
-   "preferences_enable_exclude_save_player_pos_for_few_genres": "Disable saving current video time for music: ",
-    "preferences_always_loop_playlist": "Always loop playlist, currently works only for playlists with up to 50 videos: ",
+    "preferences_enable_exclude_save_player_pos_for_few_genres": "Disable saving current video time for music: ",
+    "preferences_always_shuffle_playlist": "Always shuffle playlists: ",
     "generic_views_count": "{{count}} view",
     "generic_views_count_plural": "{{count}} views",
     "generic_videos_count": "{{count}} video",

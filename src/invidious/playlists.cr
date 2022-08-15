@@ -90,7 +90,7 @@ struct Playlist
   property updated : Time
   property thumbnail : String?
 
-  def to_json(offset, json : JSON::Builder, video_id : String? = nil)
+  def to_json(offset, json : JSON::Builder, video_id : String? = nil, shuffle_videos : Bool = false)
     json.object do
       json.field "type", "playlist"
       json.field "title", self.title
@@ -126,6 +126,9 @@ struct Playlist
       json.field "videos" do
         json.array do
           videos = get_playlist_videos(self, offset: offset, video_id: video_id)
+          if shuffle_videos
+            videos.shuffle()
+          end
           videos.each do |video|
             video.to_json(json)
           end
@@ -175,7 +178,7 @@ struct InvidiousPlaylist
     end
   end
 
-  def to_json(offset, json : JSON::Builder, video_id : String? = nil)
+  def to_json(offset, json : JSON::Builder, video_id : String? = nil, shuffle_videos : Bool = false)
     json.object do
       json.field "type", "invidiousPlaylist"
       json.field "title", self.title
@@ -202,6 +205,9 @@ struct InvidiousPlaylist
           end
 
           videos = get_playlist_videos(self, offset: offset, video_id: video_id)
+          if shuffle_videos
+            videos.shuffle()
+          end
           videos.each_with_index do |video, idx|
             video.to_json(json, offset + idx)
           end

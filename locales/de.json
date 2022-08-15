@@ -397,7 +397,7 @@
     "videoinfo_started_streaming_x_ago": "Stream begann vor `x`",
     "videoinfo_watch_on_youTube": "Auf YouTube ansehen",
     "preferences_quality_dash_label": "Bevorzugte DASH-Videoqualität: ",
-    "preferences_always_loop_playlist": "Wiedergabelisten immer wiederholen, funktioniert derzeit nur für Wiedergabelisten mit bis zu 50 Videos: ",
+    "preferences_always_shuffle_playlist": "Wiedergabelisten immer zufällig abspielen: ",
     "generic_subscribers_count": "{{count}} Abonnent",
     "generic_subscribers_count_plural": "{{count}} Abonnenten",
     "generic_videos_count": "{{count}} Video",

@@ -16,7 +16,7 @@ module Invidious::Routes::API::V1::Misc
   def self.get_playlist(env : HTTP::Server::Context)
     env.response.content_type = "application/json"
     plid = env.params.url["plid"]
-
+    shuffle_videos = env.params.query["shuffle"]?.try &.as_bool
     offset = env.params.query["index"]?.try &.to_i?
     offset ||= env.params.query["page"]?.try &.to_i?.try { |page| (page - 1) * 100 }
     offset ||= 0
@@ -46,7 +46,7 @@ module Invidious::Routes::API::V1::Misc
     # includes into the playlist a maximum of 20 videos, before the offset
     if offset > 0
       lookback = offset < 50 ? offset : 50
-      response = playlist.to_json(offset - lookback)
+      response = playlist.to_json(offset - lookback,shuffle_videos)
       json_response = JSON.parse(response)
     else
       #  Unless the continuation is really the offset 0, it becomes expensive.
@@ -61,7 +61,7 @@ module Invidious::Routes::API::V1::Misc
       if json_response["videos"].as_a[0]["index"] != offset
         offset = json_response["videos"].as_a[0]["index"].as_i
         lookback = offset < 50 ? offset : 50
-        response = playlist.to_json(offset - lookback)
+        response = playlist.to_json(offset - lookback,shuffle_videos)
         json_response = JSON.parse(response)
       end
     end

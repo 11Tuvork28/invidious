@@ -116,7 +116,8 @@ function get_playlist(plid) {
         plid_url = '/api/v1/playlists/' + plid +
             '?index=' + video_data.index +
             '&continuation=' + video_data.id +
-            '&format=html&hl=' + video_data.preferences.locale;
+            '&format=html&hl=' + video_data.preferences.locale +
+            '&shuffle=' + video_data.params.always_shuffle_playlist;
     }
 
     helpers.xhr('GET', plid_url, {retries: 5, entity_name: 'playlist'}, {
@@ -127,6 +128,7 @@ function get_playlist(plid) {
 
             var nextVideo = document.getElementById(response.nextVideo);
             nextVideo.parentNode.parentNode.scrollTop = nextVideo.offsetTop;
+
 
             player.on('ended', function () {
                 var url = new URL('https://example.com/watch?v=' + response.nextVideo);
@@ -142,9 +144,6 @@ function get_playlist(plid) {
                     url.searchParams.set('speed', video_data.params.speed);
                 if (video_data.params.local !== video_data.preferences.local)
                     url.searchParams.set('local', video_data.params.local);
-                if (video_data.params.always_loop_playlist)
-                    location.assign(document.getElementById("playlist").childNodes[2].childNodes[1].childNodes[1].childNodes[1].href);
-            
                 location.assign(url.pathname + url.search);
             });
         },
