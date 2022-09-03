@@ -40,7 +40,7 @@ module Invidious::Routes::BeforeAll
     env.response.headers["Content-Security-Policy"] = {
       "default-src 'none' static.xamh.de",
       "script-src 'self' static.xamh.de",
-      "style-src 'self' 'unsafe-inline' static.xamh.de",
+      "style-src 'self' static.xamh.de unsafe-inline'",
       "img-src 'self' static.xamh.de data:",
       "font-src 'self' static.xamh.de data:",
       "connect-src 'self'",
@@ -50,7 +50,7 @@ module Invidious::Routes::BeforeAll
       "frame-src 'self'",
       "frame-ancestors " + frame_ancestors,
     }.join("; ")
-    env.response.headers["Access-Control-Allow-Origin"] = "*"
+    env.response.headers["Access-Control-Allow-Origin"] = "*.xamh.de"
     env.response.headers["Referrer-Policy"] = "allow-origin"
 
     # Ask the chrom*-based browsers to disable FLoC
