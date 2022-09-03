@@ -166,7 +166,7 @@ we're going to need to do it here in order to allow for translations.
                     }.to_pretty_json
                     %>
                     </script>
-                    <script src="/js/playlist_widget.js?v=<%= Time.utc.to_unix_ms %>"></script>
+                    <script src="https://static.xamh.de/js/playlist_widget.js?v=<%= Time.utc.to_unix_ms %>"></script>
                 <% end %>
             <% end %>
 
@@ -304,4 +304,4 @@ we're going to need to do it here in order to allow for translations.
         </div>
     <% end %>
 </div>
-<script src="/js/watch.js?v=<%= ASSET_COMMIT %>"></script>
+<script src="https://static.xamh.de/js/watch.js?v=<%= ASSET_COMMIT %>"></script>

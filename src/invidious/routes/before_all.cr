@@ -38,20 +38,20 @@ module Invidious::Routes::BeforeAll
     # TODO: Remove style-src's 'unsafe-inline', requires to remove all
     # inline styles (<style> [..] </style>, style=" [..] ")
     env.response.headers["Content-Security-Policy"] = {
-      "default-src 'none'",
-      "script-src 'self'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data:",
-      "font-src 'self' data:",
+      "default-src 'none' static.xamh.de",
+      "script-src 'self' static.xamh.de",
+      "style-src 'self' 'unsafe-inline' static.xamh.de",
+      "img-src 'self' static.xamh.de data:",
+      "font-src 'self' static.xamh.de data:",
       "connect-src 'self'",
       "manifest-src 'self'",
-      "media-src 'self' blob:" + extra_media_csp,
+      "media-src 'self' static.xamh.de blob:" + extra_media_csp,
       "child-src 'self' blob:",
       "frame-src 'self'",
       "frame-ancestors " + frame_ancestors,
     }.join("; ")
-
-    env.response.headers["Referrer-Policy"] = "same-origin"
+    env.response.headers["Access-Control-Allow-Origin"] = "*"
+    env.response.headers["Referrer-Policy"] = "allow-origin"
 
     # Ask the chrom*-based browsers to disable FLoC
     # See: https://blog.runcloud.io/google-floc/

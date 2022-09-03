@@ -8,10 +8,10 @@
     <%= rendered "components/player_sources" %>
     <link rel="stylesheet" href="/videojs/videojs-overlay/videojs-overlay.css?v=<%= ASSET_COMMIT %>">
     <script src="/videojs/videojs-overlay/videojs-overlay.js?v=<%= ASSET_COMMIT %>"></script>
-    <link rel="stylesheet" href="/css/default.css?v=<%= ASSET_COMMIT %>">
-    <link rel="stylesheet" href="/css/embed.css?v=<%= ASSET_COMMIT %>">
+    <link rel="stylesheet" href="https://static.xamh.de/css/default.css?v=<%= ASSET_COMMIT %>">
+    <link rel="stylesheet" href="https://static.xamh.de/css/embed.css?v=<%= ASSET_COMMIT %>">
     <title><%= HTML.escape(video.title) %> - Invidious</title>
-    <script src="/js/_helpers.js?v=<%= ASSET_COMMIT %>"></script>
+    <script src="https://static.xamh.de/js/_helpers.js?v=<%= ASSET_COMMIT %>"></script>
 </head>
 
 <body class="dark-theme">
@@ -32,6 +32,6 @@
 </script>
 
 <%= rendered "components/player" %>
-<script src="/js/embed.js?v=<%= ASSET_COMMIT %>"></script>
+<script src="https://static.xamh.de/js/embed.js?v=<%= ASSET_COMMIT %>"></script>
 </body>
 </html>

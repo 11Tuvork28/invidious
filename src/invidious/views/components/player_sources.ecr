@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="/videojs/videojs-share/videojs-share.css?v=<%= ASSET_COMMIT %>">
 <link rel="stylesheet" href="/videojs/videojs-vtt-thumbnails/videojs-vtt-thumbnails.css?v=<%= ASSET_COMMIT %>">
 <link rel="stylesheet" href="/videojs/videojs-mobile-ui/videojs-mobile-ui.css?v=<%= ASSET_COMMIT %>">
-<link rel="stylesheet" href="/css/player.css?v=<%= ASSET_COMMIT %>">
+<link rel="stylesheet" href="https://static.xamh.de/css/player.css?v=<%= ASSET_COMMIT %>">
 
 <script src="/videojs/video.js/video.js?v=<%= ASSET_COMMIT %>"></script>
 <script src="/videojs/videojs-mobile-ui/videojs-mobile-ui.js?v=<%= ASSET_COMMIT %>"></script>
@@ -16,13 +16,13 @@
 
 
 <% if params.annotations %>
-    <link rel="stylesheet" href="/css/videojs-youtube-annotations.min.css?v=<%= ASSET_COMMIT %>">
-    <script src="/js/videojs-youtube-annotations.min.js?v=<%= ASSET_COMMIT %>"></script>
+    <link rel="stylesheet" href="https://static.xamh.de/css/videojs-youtube-annotations.min.css?v=<%= ASSET_COMMIT %>">
+    <script src="https://static.xamh.de/js/videojs-youtube-annotations.min.js?v=<%= ASSET_COMMIT %>"></script>
 <% end %>
 
 <% if params.listen || params.quality != "dash" %>
-    <link rel="stylesheet" href="/css/quality-selector.css?v=<%= ASSET_COMMIT %>">
-    <script src="/js/silvermine-videojs-quality-selector.min.js?v=<%= ASSET_COMMIT %>"></script>
+    <link rel="stylesheet" href="https://static.xamh.de/css/quality-selector.css?v=<%= ASSET_COMMIT %>">
+    <script src="https://static.xamh.de/js/silvermine-videojs-quality-selector.min.js?v=<%= ASSET_COMMIT %>"></script>
 <% end %>
 
 <% if !params.listen && params.vr_mode %>
