@@ -88,7 +88,7 @@ player.on('error', function () {
             if (!paused) player.play();
         }, 5000);
     }
-
+});
 if (video_data.params.quality === 'dash') {
     player.reloadSourceOnError({
         errorInterval: 10
