@@ -103,17 +103,17 @@ function continue_autoplay(event) {
 }
 
 function get_playlist(plid) {
-    var playlistPlayer =new PlaylistPlayer(video_data,plid);
+    var playlistPlayer = new PlaylistPlayer(video_data,plid);
     playlistPlayer.loadDataAndSetUpOnPlayerEnded();
     var shuffle_button = document.getElementById('shuffle');
     if (shuffle_button) {
         shuffle_button.checked = playlistPlayer.playerData.shuffle
-        shuffle_button.onclick = playlistPlayer.toggleShuffle();
+        shuffle_button.addEventListener('click', function(event){ playlistPlayer.toggleShuffle()});
     }
     var loop_button = document.getElementById('loop');
     if (loop_button) {
         loop_button.checked = playlistPlayer.playerData.loop_all
-        loop_button.onclick = playlistPlayer.toggleLoop();
+        loop_button.addEventListener('click', function(event){ playlistPlayer.toggleLoop()});
     }
 }
 

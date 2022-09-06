@@ -7,17 +7,17 @@ class PlaylistPlayerData {
     this.trackIndex = 0;
     this.playlistStartIndex = 0;
     this.playlistEndIndex = 0;
-    this.playlistUrl = "";
     this.innerHtml = "";
     this.playlistId = plid;
     this.wasLoadedBefore = false;
+    this.offsets = {};
   }
   readFromLocalStorage() {
     let playerData = helpers.storage.get("playlistPlayerData");
     if (playerData == null || playerData == undefined) return this;
     playerData = playerData[this.playlistId];
-    this.loop_all = playerData.loop_current;
-    this.shuffle = true;
+    this.loop_all = playerData.loop_all;
+    this.shuffle = playerData.shuffle;
     this.tracks = playerData.tracks;
     this.played_tracks = playerData.played_tracks;
     this.playlistStartIndex = playerData.playlistStartIndex;
@@ -25,7 +25,10 @@ class PlaylistPlayerData {
     this.playlistUrl = playerData.playlistUrl;
     this.innerHtml = playerData.innerHtml;
     this.playlistId = playerData.playlistId;
+    this.offsets = playerData.offsets;
+    this.trackIndex = playerData.trackIndex;
     this.wasLoadedBefore = true;
+
     return this;
   }
   toLocalStorage() {
@@ -42,20 +45,19 @@ class PlaylistPlayerData {
   }
   nextTrack() {
     if (this.tracks.length > this.trackIndex + 1) {
-        this.played_tracks.push(this.tracks.slice(this.trackIndex, 1));
+        this.played_tracks.push(this.tracks.slice(this.trackIndex, 1)[0]);
         if (this.shuffle)
           this.trackIndex = Math.floor(Math.random() * this.tracks.length);
         else this.trackIndex += 1;
     } else {
-        this.tracks = this.played_tracks;
-        this.played_tracks = [];
-        if (this.loop_all && this.trackIndex == this.tracks.length - 1){
-            this.trackIndex = 0;
-            return 0;
+      if (this.loop_all){
+        this.trackIndex = 0;
+        return 0;
         }else{
             return undefined;
         }
     }
+    this.setOffset(this.getCurrentTrack())
     return this.trackIndex;
   }
   addTrack(track) {
@@ -75,14 +77,21 @@ class PlaylistPlayerData {
           this.tracks.push(node.id);
         }
       });
+    this.generateOffsets();
   }
   setInnerHtml(innerHtml) {
     this.innerHtml = innerHtml;
   }
-  setOffset() {
+  /** @private */
+  generateOffsets() {
+    this.tracks.forEach((track) => {
+      this.offsets[track] = document.getElementById(track).offsetTop;
+    });
+  }
+  setOffset(){
     document.getElementsByClassName(
-        "pure-menu pure-menu-scrollable playlist-restricted"
-      )[0].scrollTop = document.getElementById(this.getCurrentTrack()).offsetTop;
+      "pure-menu pure-menu-scrollable playlist-restricted"
+    )[0].scrollTop = this.offsets[this.getCurrentTrack()];
   }
   setPlaylistId(playlistId) {
     this.playlistId = playlistId;
@@ -95,17 +104,11 @@ class PlaylistPlayerData {
     this.trackIndex = index;
     this.playlistEndIndex = this.tracks.length - 1;
   }
-  toggle(mode){
-    if (mode === "shuffle") this.shuffle = !this.shuffle;
-    if (mode === "loop") this.loop_all = !this.loop_all;
-    else throw new Error("Unknown mode: " + mode);
-  }
 }
 class PlaylistPlayer {
   constructor(video_Data, plid) {
     this.videoData = video_Data;
     this.playerData = new PlaylistPlayerData(plid).readFromLocalStorage();
-    this.playerData.setPlayingIndex(this.videoData.index);
     this.playlistNode = document.getElementById("playlist");
     this.playlistNode.innerHTML = spinnerHTMLwithHR;
     this.plid = plid;
@@ -114,9 +117,11 @@ class PlaylistPlayer {
     var context = this;
     if (this.playerData.wasLoaded()) {
       this.playlistNode.innerHTML = this.playerData.innerHtml;
+      this.playerData.setPlayingIndex(this.videoData.index);
       this.playerData.setOffset();
       this.playerData.toLocalStorage();
       player.on("ended", function () {
+        console.log("Player ended");
         context.next();
       });
       return;
@@ -146,18 +151,21 @@ class PlaylistPlayer {
     }
     var playerData = this.playerData;
     var playlist = this.playlistNode;
+    var videoData = this.videoData;
     helpers.xhr(
       "GET",
       plid_url,
       { retries: 5, entity_name: "playlist" },
       {
         on200: function (response) {
-          playerData.setInnerHtml(response.playlistHtml);
-          playerData.parseResponse(response.playlistHtml);
-          playerData.toLocalStorage();
           playlist.innerHTML = response.playlistHtml;
+          playerData.setInnerHtml(response.playlistHtml);
+          playerData.setPlayingIndex(videoData.index);
+          playerData.parseResponse(response.playlistHtml);
           playerData.setOffset();
+          playerData.toLocalStorage();
           player.on("ended", function () {
+            console.log("Player ended");
             context.next();
           });
         },
@@ -193,7 +201,6 @@ class PlaylistPlayer {
       url.searchParams.set("local", this.videoData.params.local);
     return url;
   }
-
   next() {
     let index = this.playerData.nextTrack();
     if (index === undefined) return;
@@ -204,9 +211,13 @@ class PlaylistPlayer {
     location.assign(url.pathname + url.search);
   }
   toggleShuffle() {
-    this.playerData.shuffle = !  this.playerData.shuffle;
+    this.playerData.shuffle = !this.playerData.shuffle;
+    console.log("Shuffle: " + this.playerData.shuffle);
+    this.playerData.toLocalStorage();
   }
   toggleLoop() {
-    this.playerData.loop = !this.playerData.loop;
+    this.playerData.loop_all = !this.playerData.loop_all;
+    console.log("Looping playlists: " + this.playerData.loop_all);
+    this.playerData.toLocalStorage();
   }
 }
