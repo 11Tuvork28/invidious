@@ -13,23 +13,26 @@ class PlaylistPlayerData {
     this.offsets = {};
   }
   readFromLocalStorage() {
-    let playerData = helpers.storage.get("playlistPlayerData");
-    if (playerData == null || playerData == undefined) return this;
-    playerData = playerData[this.playlistId];
-    this.loop_all = playerData.loop_all;
-    this.shuffle = playerData.shuffle;
-    this.tracks = playerData.tracks;
-    this.played_tracks = playerData.played_tracks;
-    this.playlistStartIndex = playerData.playlistStartIndex;
-    this.playlistEndIndex = playerData.playlistEndIndex;
-    this.playlistUrl = playerData.playlistUrl;
-    this.innerHtml = playerData.innerHtml;
-    this.playlistId = playerData.playlistId;
-    this.offsets = playerData.offsets;
-    this.trackIndex = playerData.trackIndex;
-    this.wasLoadedBefore = true;
+    try {
+      let playerData = helpers.storage.get("playlistPlayerData")[this.playlistId];
+      this.loop_all = playerData.loop_all;
+      this.shuffle = playerData.shuffle;
+      this.tracks = playerData.tracks;
+      this.played_tracks = playerData.played_tracks;
+      this.playlistStartIndex = playerData.playlistStartIndex;
+      this.playlistEndIndex = playerData.playlistEndIndex;
+      this.playlistUrl = playerData.playlistUrl;
+      this.innerHtml = playerData.innerHtml;
+      this.playlistId = playerData.playlistId;
+      this.offsets = playerData.offsets;
+      this.trackIndex = playerData.trackIndex;
+      this.wasLoadedBefore = true;
+  
+      return this;
+    } catch (error) {
+      return this;
+    }
 
-    return this;
   }
   toLocalStorage() {
     this.playlistStartIndex = this.trackIndex;
@@ -44,19 +47,19 @@ class PlaylistPlayerData {
     return this.tracks[this.trackIndex];
   }
   nextTrack() {
-    if (this.tracks.length > this.trackIndex + 1) {
-        this.played_tracks.push(this.tracks.slice(this.trackIndex, 1)[0]);
-        if (this.shuffle)
-          this.trackIndex = Math.floor(Math.random() * this.tracks.length);
-        else this.trackIndex += 1;
-    } else {
-      if (this.loop_all){
-        this.trackIndex = 0;
-        return 0;
-        }else{
-            return undefined;
-        }
+    let playedTrack = this.tracks.splice(this.trackIndex, 1);
+    if (playedTrack !== undefined || playedTrack !== null)
+      this.played_tracks.push(playedTrack[0]);
+    if (this.shuffle)
+      this.trackIndex = Math.floor(Math.random() * this.tracks.length);
+    else if (this.tracks.length < this.trackIndex + 1)
+      this.trackIndex += 1;
+    else if (this.loop_all){
+      this.trackIndex = 0;
+      return 0;
     }
+    else 
+      return undefined;
     this.setOffset(this.getCurrentTrack())
     return this.trackIndex;
   }
@@ -100,6 +103,7 @@ class PlaylistPlayerData {
     return this.wasLoadedBefore;
   }
   setPlayingIndex(index) {
+    if (index !== Number) index = 0;
     this.playlistStartIndex = index;
     this.trackIndex = index;
     this.playlistEndIndex = this.tracks.length - 1;
