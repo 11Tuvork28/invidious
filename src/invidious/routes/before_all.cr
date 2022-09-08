@@ -40,7 +40,7 @@ module Invidious::Routes::BeforeAll
     env.response.headers["Content-Security-Policy"] = {
       "default-src 'none' static.xamh.de",
       "script-src 'self' static.xamh.de",
-      "style-src 'self' static.xamh.de unsafe-inline'",
+      "style-src 'self' static.xamh.de 'unsafe-inline'",
       "img-src 'self' static.xamh.de data:",
       "font-src 'self' static.xamh.de data:",
       "connect-src 'self'",
