@@ -3,7 +3,7 @@ name: Build and release container image
 on:
   push:
     branches:
-      - "master"
+      - "*"
     paths-ignore:
       - "*.md"
       - LICENCE
@@ -69,7 +69,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: release=1
-          push: ${{ github.ref == 'refs/heads/master' }}
+          push: true
           
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

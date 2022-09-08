@@ -103,61 +103,18 @@ function continue_autoplay(event) {
 }
 
 function get_playlist(plid) {
-    var playlist = document.getElementById('playlist');
-
-    playlist.innerHTML = spinnerHTMLwithHR;
-
-    var plid_url;
-    if (plid.startsWith('RD')) {
-        plid_url = '/api/v1/mixes/' + plid +
-            '?continuation=' + video_data.id +
-            '&format=html&hl=' + video_data.preferences.locale;
-    } else {
-        plid_url = '/api/v1/playlists/' + plid +
-            '?index=' + video_data.index +
-            '&continuation=' + video_data.id +
-            '&format=html&hl=' + video_data.preferences.locale +
-            '&shuffle=' + video_data.params.always_shuffle_playlist;
+    var playlistPlayer = new PlaylistPlayer(video_data,plid);
+    playlistPlayer.loadDataAndSetUpOnPlayerEnded();
+    var shuffle_button = document.getElementById('shuffle');
+    if (shuffle_button) {
+        shuffle_button.checked = playlistPlayer.playerData.shuffle
+        shuffle_button.addEventListener('click', function(event){ playlistPlayer.toggleShuffle()});
     }
-
-    helpers.xhr('GET', plid_url, {retries: 5, entity_name: 'playlist'}, {
-        on200: function (response) {
-            playlist.innerHTML = response.playlistHtml;
-
-            if (!response.nextVideo) return;
-
-            var nextVideo = document.getElementById(response.nextVideo);
-            nextVideo.parentNode.parentNode.scrollTop = nextVideo.offsetTop;
-
-
-            player.on('ended', function () {
-                var url = new URL('https://example.com/watch?v=' + response.nextVideo);
-
-                url.searchParams.set('list', plid);
-                if (!plid.startsWith('RD'))
-                    url.searchParams.set('index', response.index);
-                if (video_data.params.autoplay || video_data.params.continue_autoplay)
-                    url.searchParams.set('autoplay', '1');
-                if (video_data.params.listen !== video_data.preferences.listen)
-                    url.searchParams.set('listen', video_data.params.listen);
-                if (video_data.params.speed !== video_data.preferences.speed)
-                    url.searchParams.set('speed', video_data.params.speed);
-                if (video_data.params.local !== video_data.preferences.local)
-                    url.searchParams.set('local', video_data.params.local);
-                location.assign(url.pathname + url.search);
-            });
-        },
-        onNon200: function (xhr) {
-            playlist.innerHTML = '';
-            document.getElementById('continue').style.display = '';
-        },
-        onError: function (xhr) {
-            playlist.innerHTML = spinnerHTMLwithHR;
-        },
-        onTimeout: function (xhr) {
-            playlist.innerHTML = spinnerHTMLwithHR;
-        }
-    });
+    var loop_button = document.getElementById('loop');
+    if (loop_button) {
+        loop_button.checked = playlistPlayer.playerData.loop_all
+        loop_button.addEventListener('click', function(event){ playlistPlayer.toggleLoop()});
+    }
 }
 
 function get_reddit_comments() {
