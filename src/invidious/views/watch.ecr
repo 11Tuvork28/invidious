@@ -4,7 +4,7 @@
 
 
 <% content_for "header" do %>
-<meta name="thumbnail" content="<%= thumbnail %>">
+<meta name="thumbnail" content="https://static.xamh.de<%= thumbnail %>">
 <meta name="description" content="<%= HTML.escape(video.short_description) %>">
 <meta name="keywords" content="<%= video.keywords.join(",") %>">
 <meta property="og:site_name" content="Invidious">
@@ -166,7 +166,7 @@ we're going to need to do it here in order to allow for translations.
                     }.to_pretty_json
                     %>
                     </script>
-                    <script src="/js/playlist_widget.js?v=<%= Time.utc.to_unix_ms %>"></script>
+                    <script src="https://static.xamh.de/js/playlist_widget.js?v=<%= Time.utc.to_unix_ms %>"></script>
                 <% end %>
             <% end %>
 
@@ -206,7 +206,7 @@ we're going to need to do it here in order to allow for translations.
             <a href="/channel/<%= video.ucid %>" style="display:block;width:fit-content;width:-moz-fit-content">
                 <div class="channel-profile">
                     <% if !video.author_thumbnail.empty? %>
-                        <img src="/ggpht<%= URI.parse(video.author_thumbnail).request_target %>">
+                        <img src="https://static.xamh.de/ggpht<%= URI.parse(video.author_thumbnail).request_target %>">
                     <% end %>
                     <span id="channel-name"><%= author %><% if !video.author_verified.nil? && video.author_verified %>&nbsp;<i class="icon ion ion-md-checkmark-circle"></i><% end %></span>
                 </div>
@@ -278,7 +278,7 @@ we're going to need to do it here in order to allow for translations.
                             <a href="/watch?v=<%= rv["id"] %>">
                                 <% if !env.get("preferences").as(Preferences).thin_mode %>
                                     <div class="thumbnail">
-                                        <img loading="lazy" class="thumbnail" src="/vi/<%= rv["id"] %>/mqdefault.jpg">
+                                        <img loading="lazy" class="thumbnail" src="https://static.xamh.de/vi/<%= rv["id"] %>/mqdefault.jpg">
                                         <p class="length"><%= recode_length_seconds(rv["length_seconds"]?.try &.to_i? || 0) %></p>
                                     </div>
                                 <% end %>
@@ -308,5 +308,5 @@ we're going to need to do it here in order to allow for translations.
         </div>
     <% end %>
 </div>
-<script src="/js/watch.js?v=<%= ASSET_COMMIT %>"></script>
-<script src="/js/playlist_player.js"></script>
+<script src="https://static.xamh.de/js/playlist_player.js"></script>
+<script src="https://static.xamh.de/js/watch.js?v=<%= ASSET_COMMIT %>"></script>
