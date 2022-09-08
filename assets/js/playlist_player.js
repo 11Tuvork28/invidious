@@ -52,7 +52,7 @@ class PlaylistPlayerData {
       this.played_tracks.push(playedTrack[0]);
     if (this.shuffle)
       this.trackIndex = Math.floor(Math.random() * this.tracks.length);
-    else if (this.tracks.length < this.trackIndex + 1)
+    else if (!(this.tracks.length <= this.trackIndex + 1))
       this.trackIndex += 1;
     else if (this.loop_all){
       this.trackIndex = 0;
