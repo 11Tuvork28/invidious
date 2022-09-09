@@ -35,14 +35,16 @@ class PlaylistPlayerData {
   }
   toLocalStorage() {
     this.playlistStartIndex = this.trackIndex;
-    let saves;
     try {
-      saves = helpers.storage.get("playlistPlayerData");
+      let saves = helpers.storage.get("playlistPlayerData");
+      saves[this.playlistId] = this;
+      helpers.storage.set("playlistPlayerData", saves);
     } catch (error) {
-      saves = {}; 
+      let saves = {};
+      saves[this.playlistId] = this;
+      helpers.storage.set("playlistPlayerData", saves);
     }
-    saves[this.playlistId] = this;
-    helpers.storage.set("playlistPlayerData", saves);
+
   }
   getCurrentIndex() {
     return this.trackIndex;
