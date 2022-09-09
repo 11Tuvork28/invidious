@@ -1,5 +1,5 @@
 class PlaylistData {
-  constructor(plid) {
+  constructor(plid, isCustom) {
     this.loop_all = false;
     this.shuffle = false;
     this.tracks = [];
@@ -11,6 +11,7 @@ class PlaylistData {
     this.playlistId = plid;
     this.wasLoadedBefore = false;
     this.offsets = {};
+    this.isCustom = isCustom;
   }
   readFromLocalStorage() {
     try {
@@ -26,8 +27,8 @@ class PlaylistData {
       this.playlistId = playerData.playlistId;
       this.offsets = playerData.offsets;
       this.trackIndex = playerData.trackIndex;
+      this.isCustom = playerData.isCustom;
       this.wasLoadedBefore = true;
-      this.setOffset(this.getCurrentTrack());
       return this;
     } catch (error) {
       return this;
@@ -69,7 +70,6 @@ class PlaylistData {
     this.tracks.push(track);
     this.playlistEndIndex += 1;
   }
-
   parseResponse(playlistHtml) {
     var parser = new DOMParser();
     var doc = parser.parseFromString(playlistHtml, "text/html");
@@ -106,7 +106,9 @@ class PlaylistData {
   setPlayingIndex() {
     // We try to get index from the tracks array since sometimes we get the video ID not index IDK.
     const nRawIndex = parseInt(
-      new URLSearchParams(window.location.search).get("index")
+      this.isCustom
+        ? new URLSearchParams(window.location.search).get("index")
+        : new URLSearchParams(window.location.search).get("indexCustom")
     );
     // Here rescue the index in case we got gibberish.
     const index = Number.isNaN(nRawIndex) ? 0 : nRawIndex;
@@ -119,10 +121,15 @@ class PlaylistData {
     this.setOffset();
   }
 }
-class PlaylistPlayer {
+class PlaylistManager {
   constructor(video_Data, plid) {
+    let isCustom = false;
+    if (plid === undefined) {
+      plid = Date.now() + "-CustomPL";
+      isCustom = true;
+    }
     this.videoData = video_Data;
-    this.playerData = new PlaylistData(plid).readFromLocalStorage();
+    this.playerData = new PlaylistData(plid, isCustom).readFromLocalStorage();
     this.playlistNode = document.getElementById("playlist");
     this.playlistNode.innerHTML = spinnerHTMLwithHR;
     this.plid = plid;
@@ -194,12 +201,15 @@ class PlaylistPlayer {
       }
     );
   }
+  /** @private */
   buildUrl(video_id, index) {
     var url = new URL("https://example.com/watch?v=" + video_id);
-
-    url.searchParams.set("list", this.plid);
-    if (!this.playerData.playlistId.startsWith("RD"))
-      url.searchParams.set("index", index);
+    if (!this.playerData.isCustom) {
+      url.searchParams.set("list", this.plid);
+    }
+    // We always need the index regardless of what the backend thinks about it
+    if (this.playerData.isCustom) url.searchParams.set("indexCustom", index);
+    else url.searchParams.set("index", index);
     if (
       this.videoData.params.autoplay ||
       this.videoData.params.continue_autoplay
@@ -231,4 +241,5 @@ class PlaylistPlayer {
     console.log("Looping playlists: " + this.playerData.loop_all);
     this.playerData.toLocalStorage();
   }
+  addVideo(video_id) {}
 }
