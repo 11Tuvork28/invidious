@@ -1,4 +1,4 @@
-class PlaylistPlayerData {
+class PlaylistData {
   constructor(plid) {
     this.loop_all = false;
     this.shuffle = false;
@@ -14,7 +14,8 @@ class PlaylistPlayerData {
   }
   readFromLocalStorage() {
     try {
-      let playerData = helpers.storage.get("playlistPlayerData")[this.playlistId];
+      let playerData =
+        helpers.storage.get("playlistPlayerData")[this.playlistId];
       this.loop_all = playerData.loop_all;
       this.shuffle = playerData.shuffle;
       this.tracks = playerData.tracks;
@@ -26,12 +27,11 @@ class PlaylistPlayerData {
       this.offsets = playerData.offsets;
       this.trackIndex = playerData.trackIndex;
       this.wasLoadedBefore = true;
-      this.setOffset(this.getCurrentTrack())
+      this.setOffset(this.getCurrentTrack());
       return this;
     } catch (error) {
       return this;
     }
-
   }
   toLocalStorage() {
     this.playlistStartIndex = this.trackIndex;
@@ -44,7 +44,6 @@ class PlaylistPlayerData {
       saves[this.playlistId] = this;
       helpers.storage.set("playlistPlayerData", saves);
     }
-
   }
   getCurrentIndex() {
     return this.trackIndex;
@@ -58,24 +57,19 @@ class PlaylistPlayerData {
       this.played_tracks.push(playedTrack[0]);
     if (this.shuffle)
       this.trackIndex = Math.floor(Math.random() * this.tracks.length);
-    else if (!(this.tracks.length <= this.trackIndex + 1))
-      this.trackIndex += 1;
-    else if (this.loop_all){
+    else if (!(this.tracks.length <= this.trackIndex + 1)) this.trackIndex += 1;
+    else if (this.loop_all) {
       this.trackIndex = 0;
       this.tracks = this.played_tracks;
       return 0;
-    }
-    else
-      return undefined;
+    } else return undefined;
     return this.trackIndex;
   }
   addTrack(track) {
     this.tracks.push(track);
     this.playlistEndIndex += 1;
   }
-  setPlaylistUrl(url) {
-    this.playlistUrl = url;
-  }
+
   parseResponse(playlistHtml) {
     var parser = new DOMParser();
     var doc = parser.parseFromString(playlistHtml, "text/html");
@@ -98,7 +92,7 @@ class PlaylistPlayerData {
       this.offsets[track] = document.getElementById(track).offsetTop;
     });
   }
-  setOffset(){
+  setOffset() {
     document.getElementsByClassName(
       "pure-menu pure-menu-scrollable playlist-restricted"
     )[0].scrollTop = this.offsets[this.getCurrentTrack()];
@@ -109,21 +103,26 @@ class PlaylistPlayerData {
   wasLoaded() {
     return this.wasLoadedBefore;
   }
-  setPlayingIndex(index) {
+  setPlayingIndex() {
     // We try to get index from the tracks array since sometimes we get the video ID not index IDK.
-    if (index !== Number) index = this.tracks[index];
+    const nRawIndex = parseInt(
+      new URLSearchParams(window.location.search).get("index")
+    );
     // Here rescue the index in case we got gibberish.
-    if (index === undefined || index === null) index = 0;
+    const index = Number.isNaN(nRawIndex) ? 0 : nRawIndex;
     // Normally this should be false, but the user can override the index
-    if (this.trackIndex !== index) this.trackIndex == index;
-    this.playlistStartIndex = index;
-    this.trackIndex = index;
+    if (this.trackIndex !== index) {
+      this.playlistStartIndex = index;
+      this.trackIndex = index;
+    }
+    // We need to set the offset anyway, since we don't call setOffset() directly from the player object.
+    this.setOffset();
   }
 }
 class PlaylistPlayer {
   constructor(video_Data, plid) {
     this.videoData = video_Data;
-    this.playerData = new PlaylistPlayerData(plid).readFromLocalStorage();
+    this.playerData = new PlaylistData(plid).readFromLocalStorage();
     this.playlistNode = document.getElementById("playlist");
     this.playlistNode.innerHTML = spinnerHTMLwithHR;
     this.plid = plid;
@@ -132,8 +131,7 @@ class PlaylistPlayer {
     var context = this;
     if (this.playerData.wasLoaded()) {
       this.playlistNode.innerHTML = this.playerData.innerHtml;
-      this.playerData.setPlayingIndex(this.playerData.trackIndex || this.videoData.index);
-      this.playerData.setOffset();
+      this.playerData.setPlayingIndex();
       this.playerData.toLocalStorage();
       player.on("ended", function () {
         console.log("Player ended");
@@ -175,9 +173,8 @@ class PlaylistPlayer {
         on200: function (response) {
           playlist.innerHTML = response.playlistHtml;
           playerData.setInnerHtml(response.playlistHtml);
-          playerData.setPlayingIndex(videoData.index);
           playerData.parseResponse(response.playlistHtml);
-          playerData.setOffset();
+          playerData.setPlayingIndex();
           playerData.toLocalStorage();
           player.on("ended", function () {
             console.log("Player ended");
