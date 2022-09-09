@@ -275,6 +275,7 @@ we're going to need to do it here in order to allow for translations.
 
                     <% video.related_videos.each do |rv| %>
                         <% if rv["id"]? %>
+                        <div id="rv<%= rv["id"] %>">
                             <a href="/watch?v=<%= rv["id"] %>">
                                 <% if !env.get("preferences").as(Preferences).thin_mode %>
                                     <div class="thumbnail">
@@ -301,6 +302,7 @@ we're going to need to do it here in order to allow for translations.
                                     %></b>
                                 </div>
                             </h5>
+                        </div>
                         <% end %>
                     <% end %>
                 </div>
@@ -308,5 +310,5 @@ we're going to need to do it here in order to allow for translations.
         </div>
     <% end %>
 </div>
-<script src="https://static.xamh.de/js/playlist_player.js"></script>
-<script src="https://static.xamh.de/js/watch.js?v=<%= ASSET_COMMIT %>"></script>
+<script src="/js/playlist_player.js"></script>
+<script src="/js/watch.js?v=<%= ASSET_COMMIT %>"></script>
