@@ -21,13 +21,12 @@ class PlaylistPlayerData {
       this.played_tracks = playerData.played_tracks;
       this.playlistStartIndex = playerData.playlistStartIndex;
       this.playlistEndIndex = playerData.playlistEndIndex;
-      this.playlistUrl = playerData.playlistUrl;
       this.innerHtml = playerData.innerHtml;
       this.playlistId = playerData.playlistId;
       this.offsets = playerData.offsets;
       this.trackIndex = playerData.trackIndex;
       this.wasLoadedBefore = true;
-  
+      this.setOffset(this.getCurrentTrack())
       return this;
     } catch (error) {
       return this;
@@ -36,7 +35,12 @@ class PlaylistPlayerData {
   }
   toLocalStorage() {
     this.playlistStartIndex = this.trackIndex;
-    let saves = helpers.storage.get("playlistPlayerData");
+    let saves;
+    try {
+      saves = helpers.storage.get("playlistPlayerData");
+    } catch (error) {
+      saves = {}; 
+    }
     saves[this.playlistId] = this;
     helpers.storage.set("playlistPlayerData", saves);
   }
@@ -56,11 +60,11 @@ class PlaylistPlayerData {
       this.trackIndex += 1;
     else if (this.loop_all){
       this.trackIndex = 0;
+      this.tracks = this.played_tracks;
       return 0;
     }
-    else 
+    else
       return undefined;
-    this.setOffset(this.getCurrentTrack())
     return this.trackIndex;
   }
   addTrack(track) {
@@ -80,6 +84,7 @@ class PlaylistPlayerData {
           this.tracks.push(node.id);
         }
       });
+    this.playlistEndIndex = this.tracks.length - 1;
     this.generateOffsets();
   }
   setInnerHtml(innerHtml) {
@@ -103,10 +108,14 @@ class PlaylistPlayerData {
     return this.wasLoadedBefore;
   }
   setPlayingIndex(index) {
-    if (index !== Number) index = 0;
+    // We try to get index from the tracks array since sometimes we get the video ID not index IDK.
+    if (index !== Number) index = this.tracks[index];
+    // Here rescue the index in case we got gibberish.
+    if (index === undefined || index === null) index = 0;
+    // Normally this should be false, but the user can override the index
+    if (this.trackIndex !== index) this.trackIndex == index;
     this.playlistStartIndex = index;
     this.trackIndex = index;
-    this.playlistEndIndex = this.tracks.length - 1;
   }
 }
 class PlaylistPlayer {
@@ -121,7 +130,7 @@ class PlaylistPlayer {
     var context = this;
     if (this.playerData.wasLoaded()) {
       this.playlistNode.innerHTML = this.playerData.innerHtml;
-      this.playerData.setPlayingIndex(this.videoData.index);
+      this.playerData.setPlayingIndex(this.playerData.trackIndex || this.videoData.index);
       this.playerData.setOffset();
       this.playerData.toLocalStorage();
       player.on("ended", function () {
@@ -209,7 +218,6 @@ class PlaylistPlayer {
     let index = this.playerData.nextTrack();
     if (index === undefined) return;
     let video_id = this.playerData.tracks[index];
-    this.playerData.setOffset();
     this.playerData.toLocalStorage();
     let url = this.buildUrl(video_id, index);
     location.assign(url.pathname + url.search);
