@@ -1,3 +1,32 @@
+class PlaylistVideo {
+  title;
+  channelName;
+  duration;
+  id;
+  constructor(array1, array2, id) {
+    this.title = array1[2];
+    this.channelName = array2[0];
+    this.duration = array1[0];
+    this.id = id;
+  }
+  toHtml() {
+    return new DOMParser().parseFromString(
+      '<li class="pure-menu-item" id="' +
+        this.id +
+        '"><a href="/watch?v=' +
+        this.id +
+        '"><div class="thumbnail"><img loading="lazy" class="thumbnail" src="/vi/' +
+        this.id +
+        '/mqdefault.jpg"><p class="length">' +
+        this.duration +
+        '</p></div><p style="width:100%">' +
+        this.title +
+        '</p><p><b style="width:100%">' +
+        this.channelName +
+        "</b></p></a></li>"
+    );
+  }
+}
 class PlaylistData {
   constructor(plid, isCustom) {
     this.loop_all = false;
@@ -66,8 +95,12 @@ class PlaylistData {
     } else return undefined;
     return this.trackIndex;
   }
-  addTrack(track) {
-    this.tracks.push(track);
+  addTrack(track, playNext) {
+    if (playNext) {
+      if (this.trackIndex >= this.tracks.length) this.tracks.push(track);
+      else this.tracks.splice(this.trackIndex + 1, 0, track);
+      return;
+    } else this.tracks.push(track);
     this.playlistEndIndex += 1;
   }
   parseResponse(playlistHtml) {
@@ -122,17 +155,19 @@ class PlaylistData {
   }
 }
 class PlaylistManager {
-  constructor(video_Data, plid) {
+  addPlaylist(plid) {
     let isCustom = false;
     if (plid === undefined) {
       plid = Date.now() + "-CustomPL";
       isCustom = true;
     }
-    this.videoData = video_Data;
     this.playerData = new PlaylistData(plid, isCustom).readFromLocalStorage();
     this.playlistNode = document.getElementById("playlist");
     this.playlistNode.innerHTML = spinnerHTMLwithHR;
     this.plid = plid;
+  }
+  addVideoData(video_data) {
+    this.videoData = video_data;
   }
   loadDataAndSetUpOnPlayerEnded() {
     var context = this;
@@ -146,6 +181,7 @@ class PlaylistManager {
       });
       return;
     }
+    if (this.videoData === undefined) { throw new Error("Video data not loaded. Call addVideoData(video_data) first."); }
     this.playerData.setPlaylistId(this.plid);
     var plid_url;
     if (this.plid.startsWith("RD")) {
@@ -241,5 +277,16 @@ class PlaylistManager {
     console.log("Looping playlists: " + this.playerData.loop_all);
     this.playerData.toLocalStorage();
   }
-  addVideo(video_id) {}
+  addVideo(video_id) {
+    let node = PlaylistVideo(document
+      .getElementById("rv"+video_id)
+      .children[0].outerText.split("\n"),document
+      .getElementById("rv"+video_id)
+      .children[1].outerText.split("\n"), video_id);
+    this.playerData.addTrack(video_id, false);
+    let innerHTML = this.playerData.innerHtml;
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(innerHTML, "text/html");
+    doc.getElementsByClassName("pure-menu-list")[0].appendChild(node);
+  }
 }
