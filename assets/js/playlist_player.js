@@ -14,7 +14,9 @@ class PlaylistVideo {
       '<li class="pure-menu-item" id="' +
         this.id +
         '"><a href="/watch?v=' +
-        this.id +"&"+ urlParams.join("&") +
+        this.id +
+        "&" +
+        urlParams.join("&") +
         '"><div class="thumbnail"><img loading="lazy" class="thumbnail" src="/vi/' +
         this.id +
         '/mqdefault.jpg"><p class="length">' +
@@ -23,7 +25,8 @@ class PlaylistVideo {
         this.title +
         '</p><p><b style="width:100%">' +
         this.channelName +
-        "</b></p></a></li>","text/html"
+        "</b></p></a></li>",
+      "text/html"
     );
   }
 }
@@ -41,6 +44,7 @@ class PlaylistData {
     this.wasLoadedBefore = false;
     this.offsets = {};
     this.isCustom = isCustom;
+    this.originalTrackCount = 0;
   }
   readFromLocalStorage() {
     try {
@@ -57,6 +61,7 @@ class PlaylistData {
       this.offsets = playerData.offsets;
       this.trackIndex = playerData.trackIndex;
       this.isCustom = playerData.isCustom;
+      this.originalTrackCount = playerData.originalTrackCount;
       this.wasLoadedBefore = true;
       return this;
     } catch (error) {
@@ -82,29 +87,31 @@ class PlaylistData {
     return this.tracks[this.trackIndex];
   }
   nextTrack() {
-    let playedTrack = this.tracks.splice(this.trackIndex, 1);
-    if (playedTrack !== undefined || playedTrack !== null)
-      this.played_tracks.push(playedTrack[0]);
     if (this.shuffle)
-      if (this.tracks.length == 0) return undefined
-      else
-        this.trackIndex = Math.floor(Math.random() * this.tracks.length);
-    else if (!(this.tracks.length <= this.trackIndex + 1)) this.trackIndex += 1;
-    else if (this.loop_all) {
-      this.trackIndex = 0;
-      this.tracks = this.played_tracks;
+      if (this.tracks.length == 0) return undefined;
+      else {
+        let playedTrack = this.tracks.splice(this.trackIndex, 1);
+        if (playedTrack !== undefined || playedTrack !== null)
+          this.played_tracks.push(playedTrack[0]);
+        this.trackIndex = Math.floor(Math.random() * this.tracks.length-1);
+        return this.originalTrackCount - this.trackIndex;
+      }
+    else if (this.loop_all && this.trackIndex == 0) {
+      this.trackIndex = this.originalTrackCount;
+      if (this.played_tracks.length - 1 == this.originalTrackCount)
+        this.tracks = this.played_tracks;
       return 0;
-    } else return undefined;
-    return this.trackIndex;
+    } else if (this.trackIndex == 0) return undefined;
+    this.played_tracks.push(this.tracks.pop());
+    this.trackIndex -= 1;
+    return this.originalTrackCount - (this.tracks.length - 1);
   }
   addTrack(track, playNext) {
-    if (playNext) {
-      if (this.trackIndex >= this.tracks.length) this.tracks.push(track);
-      else this.tracks.splice(this.trackIndex + 1, 0, track);
-      return;
-    } else this.tracks.push(track);
+    if (this.trackIndex >= this.tracks.lengt || playNext) this.tracks.push(track);
+    else this.tracks.splice(0, 0, track);
     this.playlistEndIndex += 1;
-   }
+    this.originalTrackCount += 1;
+  }
   parseResponse(playlistHtml) {
     var parser = new DOMParser();
     var doc = parser.parseFromString(playlistHtml, "text/html");
@@ -115,6 +122,8 @@ class PlaylistData {
           this.tracks.push(node.id);
         }
       });
+    this.tracks.reverse();
+    this.originalTrackCount = this.tracks.length -1;
     this.playlistEndIndex = this.tracks.length - 1;
     this.generateOffsets();
   }
@@ -131,9 +140,14 @@ class PlaylistData {
     this.offsets[track] = document.getElementById(track).offsetTop;
   }
   setOffset() {
+    let offset;
+    let offsetTrackId = this.getCurrentTrack();
+    let expectedTrackId = new URLSearchParams(window.location.search).get("v");
+    if (offsetTrackId == expectedTrackId) offset = this.offsets[offsetTrackId];
+    else offset = this.offsets[expectedTrackId];
     document.getElementsByClassName(
       "pure-menu pure-menu-scrollable playlist-restricted"
-    )[0].scrollTop = this.offsets[this.getCurrentTrack()];
+    )[0].scrollTop = offset;
   }
   setPlaylistId(playlistId) {
     this.playlistId = playlistId;
@@ -149,12 +163,10 @@ class PlaylistData {
         : new URLSearchParams(window.location.search).get("index")
     );
     // Here rescue the index in case we got gibberish.
-    const index = Number.isNaN(nRawIndex) ? 0 : nRawIndex;
-    // Normally this should be false, but the user can override the index
-    if (this.trackIndex !== index) {
-      this.playlistStartIndex = index;
-      this.trackIndex = index;
-    }
+    let index = Number.isNaN(nRawIndex) ? 0 : nRawIndex;
+    // This should never happen.
+    if (parseInt(index) > parseInt(this.originalTrackCount)) index = this.tracks.indexOf(new URLSearchParams(window.location.search).get('v'))
+    this.trackIndex = this.originalTrackCount - index;
     // We need to set the offset anyway, since we don't call setOffset() directly from the player object.
     this.setOffset();
   }
@@ -163,25 +175,28 @@ class PlaylistManager {
   constructor(video_data) {
     this.videoData = video_data;
     const plid = new URLSearchParams(window.location.search).get("list");
-    const plidCustom = new URLSearchParams(window.location.search).get("listCustom");
+    const plidCustom = new URLSearchParams(window.location.search).get(
+      "listCustom"
+    );
     if (plid === null && plidCustom != null) {
       this.hasPlaylist = true;
-      document.getElementById('autoplay-controls').style.display = "none";
+      document.getElementById("autoplay-controls").style.display = "none";
       this.createPlaylistNode();
-      this.playerData = new PlaylistData(plidCustom,true).readFromLocalStorage();
+      this.playerData = new PlaylistData(
+        plidCustom,
+        true
+      ).readFromLocalStorage();
       this.plid = plidCustom;
       this.loadDataAndSetUpOnPlayerEnded();
-    }
-    else if (plidCustom === null && plid != null) {
+    } else if (plidCustom === null && plid != null) {
       this.hasPlaylist = true;
-      this.playerData = new PlaylistData(plid,false).readFromLocalStorage();
+      this.playerData = new PlaylistData(plid, false).readFromLocalStorage();
       this.plid = plid;
       this.playlistNode = document.getElementById("playlist");
       this.loadDataAndSetUpOnPlayerEnded();
-    }
-    else {
+    } else {
       this.hasPlaylist = false;
-      this.playerData = new PlaylistData("",false)
+      this.playerData = new PlaylistData("", false);
     }
     player.on("ended", function () {
       console.log("Player ended");
@@ -257,7 +272,7 @@ class PlaylistManager {
     var url = new URL("https://example.com/watch?v=" + video_id);
     if (!this.playerData.isCustom) {
       url.searchParams.set("list", this.plid);
-    }else{
+    } else {
       // Safe query param since its not used in the backend.
       url.searchParams.set("listCustom", this.plid);
     }
@@ -280,7 +295,7 @@ class PlaylistManager {
   next() {
     let index = this.playerData.nextTrack();
     if (index === undefined) return;
-    let video_id = this.playerData.tracks[index];
+    let video_id = this.playerData.tracks[this.playerData.trackIndex];
     this.playerData.toLocalStorage();
     let url = this.buildUrl(video_id, index);
     location.assign(url.pathname + url.search);
@@ -296,28 +311,40 @@ class PlaylistManager {
     this.playerData.toLocalStorage();
   }
   addVideo(video_id) {
-    video_id = video_id.split('%')[1];
-    if (!this.hasPlaylist){
+    video_id = video_id.split("%")[1];
+    if (!this.hasPlaylist) {
       this.plid = Date.now() + "-CustomPL";
-      this.playerData = new PlaylistData(this.plid,true);
+      this.playerData = new PlaylistData(this.plid, true);
       this.hasPlaylist = true;
       this.createPlaylistNode();
     }
-    let node = new PlaylistVideo(document
-      .getElementById("rv%"+video_id)
-      .children[0].outerText.split("\n"),document
-      .getElementById("rv%"+video_id)
-      .children[1].outerText.split("\n"), video_id);
+    let node = new PlaylistVideo(
+      document
+        .getElementById("rv%" + video_id)
+        .children[0].outerText.split("\n"),
+      document
+        .getElementById("rv%" + video_id)
+        .children[1].outerText.split("\n"),
+      video_id
+    );
     // If playNext is to be implemented, we need to return the index of the added track for later use.
     this.playerData.addTrack(video_id, false);
     // Static string
     let innerHTML = this.playerData.innerHtml;
     if (innerHTML === undefined || innerHTML === null || innerHTML === "")
-      innerHTML = '<h3><a>Current Playlist</a></h3><div class="pure-menu pure-menu-scrollable playlist-restricted"><ol class="pure-menu-list"></ol></div><hr>';
+      innerHTML =
+        '<h3><a>Current Playlist</a></h3><div class="pure-menu pure-menu-scrollable playlist-restricted"><ol class="pure-menu-list"></ol></div><hr>';
     let parser = new DOMParser();
     let doc = parser.parseFromString(innerHTML, "text/html");
-    const queryParams = ["listCustom="+this.plid,this.playerData.isCustom? "indexCustom="+parseInt(this.playerData.tracks.length-1): "index="+parseInt(this.playerData.tracks.length-1)]
-    doc.body.childNodes[1].childNodes[0].appendChild(node.toHtml(queryParams).body.childNodes[0]);
+    const queryParams = [
+      "listCustom=" + this.plid,
+      this.playerData.isCustom
+        ? "indexCustom=" + parseInt(this.playerData.tracks.length - 1)
+        : "index=" + parseInt(this.playerData.tracks.length - 1),
+    ];
+    doc.body.childNodes[1].childNodes[0].appendChild(
+      node.toHtml(queryParams).body.childNodes[0]
+    );
     this.playlistNode.innerHTML = doc.body.innerHTML;
     this.playerData.setInnerHtml(doc.body.innerHTML);
     this.playerData.addOffset(video_id);
@@ -329,8 +356,14 @@ class PlaylistManager {
   }
   createPlaylistNode() {
     const div = document.getElementById("related-videos");
-    const playlistDiv = new DOMParser().parseFromString('<div><label for="loop">Loop Playlist</label><input name="loop" id="loop" type="checkbox"><label for="shuffle">Shuffle Playlist</label><input name="shuffle" id="shuffle" type="checkbox"><div id="playlist" class="h-box"></div></div>', "text/html");
-    div.insertBefore(playlistDiv.body.childNodes[0], div.childNodes[0].nextSibling);
+    const playlistDiv = new DOMParser().parseFromString(
+      '<div><label for="loop">Loop Playlist</label><input name="loop" id="loop" type="checkbox"><label for="shuffle">Shuffle Playlist</label><input name="shuffle" id="shuffle" type="checkbox"><div id="playlist" class="h-box"></div></div>',
+      "text/html"
+    );
+    div.insertBefore(
+      playlistDiv.body.childNodes[0],
+      div.childNodes[0].nextSibling
+    );
     this.playlistNode = document.getElementById("playlist");
   }
 }
