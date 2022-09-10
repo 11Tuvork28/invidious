@@ -103,18 +103,8 @@ function continue_autoplay(event) {
 }
 
 function get_playlist(plid) {
-    var playlistPlayer = new PlaylistPlayer(video_data,plid);
-    playlistPlayer.loadDataAndSetUpOnPlayerEnded();
-    var shuffle_button = document.getElementById('shuffle');
-    if (shuffle_button) {
-        shuffle_button.checked = playlistPlayer.playerData.shuffle
-        shuffle_button.addEventListener('click', function(event){ playlistPlayer.toggleShuffle()});
-    }
-    var loop_button = document.getElementById('loop');
-    if (loop_button) {
-        loop_button.checked = playlistPlayer.playerData.loop_all
-        loop_button.addEventListener('click', function(event){ playlistPlayer.toggleLoop()});
-    }
+    playlistManager.addPlaylist(plid);
+    playlistManager.loadDataAndSetUpOnPlayerEnded();
 }
 
 function get_reddit_comments() {
@@ -306,3 +296,31 @@ addEventListener('load', function (e) {
         comments.innerHTML = '';
     }
 });
+var playlistManager = new PlaylistManager(video_data);
+var shuffle_button = document.getElementById('shuffle');
+if (shuffle_button) {
+    shuffle_button.checked = playlistManager.playerData.shuffle
+    shuffle_button.addEventListener('click', function(event){ playlistManager.toggleShuffle()});
+}
+var loop_button = document.getElementById('loop');
+if (loop_button) {
+    loop_button.checked = playlistManager.playerData.loop_all
+    loop_button.addEventListener('click', function(event){ playlistManager.toggleLoop()});
+}
+function addEventHandlersRelatedVideos() {
+    let index;
+    if (document.getElementById('playlist') != null)
+        index = 2
+    else index = 1
+    document.getElementById('related-videos').childNodes[index].childNodes.forEach(function(element) {
+        if (element.nodeName == 'DIV' && element.id !=  'autoplay-controls') {
+             const vidID = element.id
+             element.childNodes[5]?  element.childNodes[5].onclick = function(event) { 
+                 console.log('Added video: ' + vidID);
+                 playlistManager.addVideo(vidID);
+                 element.childNodes[5].onclick = null;
+              }: undefined;
+        }
+    });
+}
+addEventHandlersRelatedVideos();

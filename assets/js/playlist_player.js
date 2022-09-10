@@ -9,12 +9,12 @@ class PlaylistVideo {
     this.duration = array1[0];
     this.id = id;
   }
-  toHtml() {
+  toHtml(urlParams) {
     return new DOMParser().parseFromString(
       '<li class="pure-menu-item" id="' +
         this.id +
         '"><a href="/watch?v=' +
-        this.id +
+        this.id +"&"+ urlParams.join("&") +
         '"><div class="thumbnail"><img loading="lazy" class="thumbnail" src="/vi/' +
         this.id +
         '/mqdefault.jpg"><p class="length">' +
@@ -23,7 +23,7 @@ class PlaylistVideo {
         this.title +
         '</p><p><b style="width:100%">' +
         this.channelName +
-        "</b></p></a></li>"
+        "</b></p></a></li>","text/html"
     );
   }
 }
@@ -86,7 +86,9 @@ class PlaylistData {
     if (playedTrack !== undefined || playedTrack !== null)
       this.played_tracks.push(playedTrack[0]);
     if (this.shuffle)
-      this.trackIndex = Math.floor(Math.random() * this.tracks.length);
+      if (this.tracks.length == 0) return undefined
+      else
+        this.trackIndex = Math.floor(Math.random() * this.tracks.length);
     else if (!(this.tracks.length <= this.trackIndex + 1)) this.trackIndex += 1;
     else if (this.loop_all) {
       this.trackIndex = 0;
@@ -102,7 +104,7 @@ class PlaylistData {
       return;
     } else this.tracks.push(track);
     this.playlistEndIndex += 1;
-  }
+   }
   parseResponse(playlistHtml) {
     var parser = new DOMParser();
     var doc = parser.parseFromString(playlistHtml, "text/html");
@@ -125,6 +127,9 @@ class PlaylistData {
       this.offsets[track] = document.getElementById(track).offsetTop;
     });
   }
+  addOffset(track) {
+    this.offsets[track] = document.getElementById(track).offsetTop;
+  }
   setOffset() {
     document.getElementsByClassName(
       "pure-menu pure-menu-scrollable playlist-restricted"
@@ -139,9 +144,9 @@ class PlaylistData {
   setPlayingIndex() {
     // We try to get index from the tracks array since sometimes we get the video ID not index IDK.
     const nRawIndex = parseInt(
-      this.isCustom
-        ? new URLSearchParams(window.location.search).get("index")
-        : new URLSearchParams(window.location.search).get("indexCustom")
+      this.isCustom == true
+        ? new URLSearchParams(window.location.search).get("indexCustom")
+        : new URLSearchParams(window.location.search).get("index")
     );
     // Here rescue the index in case we got gibberish.
     const index = Number.isNaN(nRawIndex) ? 0 : nRawIndex;
@@ -155,33 +160,48 @@ class PlaylistData {
   }
 }
 class PlaylistManager {
-  addPlaylist(plid) {
-    let isCustom = false;
-    if (plid === undefined) {
-      plid = Date.now() + "-CustomPL";
-      isCustom = true;
+  constructor(video_data) {
+    this.videoData = video_data;
+    const plid = new URLSearchParams(window.location.search).get("list");
+    const plidCustom = new URLSearchParams(window.location.search).get("listCustom");
+    if (plid === null && plidCustom != null) {
+      this.hasPlaylist = true;
+      document.getElementById('autoplay-controls').style.display = "none";
+      this.createPlaylistNode();
+      this.playerData = new PlaylistData(plidCustom,true).readFromLocalStorage();
+      this.plid = plidCustom;
+      this.loadDataAndSetUpOnPlayerEnded();
     }
-    this.playerData = new PlaylistData(plid, isCustom).readFromLocalStorage();
+    else if (plidCustom === null && plid != null) {
+      this.hasPlaylist = true;
+      this.playerData = new PlaylistData(plid,false).readFromLocalStorage();
+      this.plid = plid;
+      this.playlistNode = document.getElementById("playlist");
+      this.loadDataAndSetUpOnPlayerEnded();
+    }
+    else {
+      this.hasPlaylist = false;
+      this.playerData = new PlaylistData("",false)
+    }
+    player.on("ended", function () {
+      console.log("Player ended");
+      // global object Might be good to remove it from here.
+      playlistManager.next();
+    });
+  }
+  addPlaylist(plid) {
+    this.playerData = new PlaylistData(plid, false).readFromLocalStorage();
     this.playlistNode = document.getElementById("playlist");
     this.playlistNode.innerHTML = spinnerHTMLwithHR;
     this.plid = plid;
   }
-  addVideoData(video_data) {
-    this.videoData = video_data;
-  }
   loadDataAndSetUpOnPlayerEnded() {
-    var context = this;
     if (this.playerData.wasLoaded()) {
       this.playlistNode.innerHTML = this.playerData.innerHtml;
       this.playerData.setPlayingIndex();
       this.playerData.toLocalStorage();
-      player.on("ended", function () {
-        console.log("Player ended");
-        context.next();
-      });
       return;
     }
-    if (this.videoData === undefined) { throw new Error("Video data not loaded. Call addVideoData(video_data) first."); }
     this.playerData.setPlaylistId(this.plid);
     var plid_url;
     if (this.plid.startsWith("RD")) {
@@ -207,7 +227,6 @@ class PlaylistManager {
     }
     var playerData = this.playerData;
     var playlist = this.playlistNode;
-    var videoData = this.videoData;
     helpers.xhr(
       "GET",
       plid_url,
@@ -219,10 +238,6 @@ class PlaylistManager {
           playerData.parseResponse(response.playlistHtml);
           playerData.setPlayingIndex();
           playerData.toLocalStorage();
-          player.on("ended", function () {
-            console.log("Player ended");
-            context.next();
-          });
         },
         onNon200: function (xhr) {
           playlist.innerHTML = "";
@@ -242,6 +257,9 @@ class PlaylistManager {
     var url = new URL("https://example.com/watch?v=" + video_id);
     if (!this.playerData.isCustom) {
       url.searchParams.set("list", this.plid);
+    }else{
+      // Safe query param since its not used in the backend.
+      url.searchParams.set("listCustom", this.plid);
     }
     // We always need the index regardless of what the backend thinks about it
     if (this.playerData.isCustom) url.searchParams.set("indexCustom", index);
@@ -278,15 +296,41 @@ class PlaylistManager {
     this.playerData.toLocalStorage();
   }
   addVideo(video_id) {
-    let node = PlaylistVideo(document
-      .getElementById("rv"+video_id)
+    video_id = video_id.split('%')[1];
+    if (!this.hasPlaylist){
+      this.plid = Date.now() + "-CustomPL";
+      this.playerData = new PlaylistData(this.plid,true);
+      this.hasPlaylist = true;
+      this.createPlaylistNode();
+    }
+    let node = new PlaylistVideo(document
+      .getElementById("rv%"+video_id)
       .children[0].outerText.split("\n"),document
-      .getElementById("rv"+video_id)
+      .getElementById("rv%"+video_id)
       .children[1].outerText.split("\n"), video_id);
+    // If playNext is to be implemented, we need to return the index of the added track for later use.
     this.playerData.addTrack(video_id, false);
+    // Static string
     let innerHTML = this.playerData.innerHtml;
+    if (innerHTML === undefined || innerHTML === null || innerHTML === "")
+      innerHTML = '<h3><a>Current Playlist</a></h3><div class="pure-menu pure-menu-scrollable playlist-restricted"><ol class="pure-menu-list"></ol></div><hr>';
     let parser = new DOMParser();
     let doc = parser.parseFromString(innerHTML, "text/html");
-    doc.getElementsByClassName("pure-menu-list")[0].appendChild(node);
+    const queryParams = ["listCustom="+this.plid,this.playerData.isCustom? "indexCustom="+parseInt(this.playerData.tracks.length-1): "index="+parseInt(this.playerData.tracks.length-1)]
+    doc.body.childNodes[1].childNodes[0].appendChild(node.toHtml(queryParams).body.childNodes[0]);
+    this.playlistNode.innerHTML = doc.body.innerHTML;
+    this.playerData.setInnerHtml(doc.body.innerHTML);
+    this.playerData.addOffset(video_id);
+    if (!this.playerData.wasLoaded())
+      this.playerData.parseResponse(doc.body.innerHTML);
+    this.playerData.setPlayingIndex();
+    this.playerData.toLocalStorage();
+    this.playerData.wasLoadedBefore = true;
+  }
+  createPlaylistNode() {
+    const div = document.getElementById("related-videos");
+    const playlistDiv = new DOMParser().parseFromString('<div><label for="loop">Loop Playlist</label><input name="loop" id="loop" type="checkbox"><label for="shuffle">Shuffle Playlist</label><input name="shuffle" id="shuffle" type="checkbox"><div id="playlist" class="h-box"></div></div>', "text/html");
+    div.insertBefore(playlistDiv.body.childNodes[0], div.childNodes[0].nextSibling);
+    this.playlistNode = document.getElementById("playlist");
   }
 }
