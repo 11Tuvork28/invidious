@@ -31,6 +31,20 @@ class PlaylistVideo {
   }
 }
 class PlaylistData {
+  loop_all;
+  shuffle;
+  tracks
+  played_tracks
+  trackIndex;
+  playlistStartIndex;
+  playlistEndIndex;
+  innerHtml
+  playlistId;
+  wasLoadedBefore;
+  offsets;
+  isCustom;
+  originalTrackCount;
+  
   constructor(plid, isCustom) {
     this.loop_all = false;
     this.shuffle = false;
@@ -98,7 +112,8 @@ class PlaylistData {
       }
     else if (this.loop_all && this.trackIndex == 0) {
       this.trackIndex = this.originalTrackCount;
-      if (this.played_tracks.length - 1 == this.originalTrackCount)
+      // Probably user skipped to last video if this isn't true.
+      if (this.played_tracks.length == this.originalTrackCount)
         this.tracks = this.played_tracks;
       return 0;
     } else if (this.trackIndex == 0) return undefined;
@@ -107,7 +122,7 @@ class PlaylistData {
     return this.originalTrackCount - (this.tracks.length - 1);
   }
   addTrack(track, playNext) {
-    if (this.trackIndex >= this.tracks.lengt || playNext) this.tracks.push(track);
+    if (this.trackIndex >= this.tracks.length || playNext) this.tracks.push(track);
     else this.tracks.splice(0, 0, track);
     this.playlistEndIndex += 1;
     this.originalTrackCount += 1;
@@ -172,6 +187,13 @@ class PlaylistData {
   }
 }
 class PlaylistManager {
+  videoData;
+  plid;
+  plidCustom;
+  hasPlaylist;
+  playerData;
+  playlistNode;
+
   constructor(video_data) {
     this.videoData = video_data;
     const plid = new URLSearchParams(window.location.search).get("list");
@@ -354,6 +376,7 @@ class PlaylistManager {
     this.playerData.toLocalStorage();
     this.playerData.wasLoadedBefore = true;
   }
+  /** @private */
   createPlaylistNode() {
     const div = document.getElementById("related-videos");
     const playlistDiv = new DOMParser().parseFromString(
