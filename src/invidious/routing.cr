@@ -163,7 +163,6 @@ module Invidious::Routing
     get "/hashtag/:hashtag", Routes::Search, :hashtag
   end
 
-
   # -------------------
   #  Media proxy routes
   # -------------------
@@ -199,7 +198,6 @@ module Invidious::Routing
     get "/yts/img/:name", Routes::Images, :yts_image
     get "/vi/:id/:name", Routes::Images, :thumbnails
   end
-
 
   # -------------------
   #  API routes
