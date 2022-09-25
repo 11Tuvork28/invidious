@@ -16,153 +16,10 @@ module Invidious::Routing
   {% end %}
 
   def register_all
-    {% unless flag?(:api_only) %}
-      get "/", Routes::Misc, :home
-      get "/privacy", Routes::Misc, :privacy
-      get "/licenses", Routes::Misc, :licenses
-      get "/redirect", Routes::Misc, :cross_instance_redirect
-
-      self.register_channel_routes
-      self.register_watch_routes
-
-      self.register_iv_playlist_routes
-      self.register_yt_playlist_routes
-
-      self.register_search_routes
-
-      self.register_user_routes
-      self.register_feed_routes
-
-      # Support push notifications via PubSubHubbub
-      get "/feed/webhook/:token", Routes::Feeds, :push_notifications_get
-      post "/feed/webhook/:token", Routes::Feeds, :push_notifications_post
-
-      get "/modify_notifications", Routes::Notifications, :modify
-    {% end %}
-
-    self.register_image_routes
     self.register_api_v1_routes
     self.register_api_manifest_routes
     self.register_video_playback_routes
   end
-
-  # -------------------
-  #  Invidious routes
-  # -------------------
-
-  def register_user_routes
-    # User login/out
-    get "/login", Routes::Login, :login_page
-    post "/login", Routes::Login, :login
-    post "/signout", Routes::Login, :signout
-    get "/Captcha", Routes::Login, :captcha
-
-    # User preferences
-    get "/preferences", Routes::PreferencesRoute, :show
-    post "/preferences", Routes::PreferencesRoute, :update
-    get "/toggle_theme", Routes::PreferencesRoute, :toggle_theme
-    get "/data_control", Routes::PreferencesRoute, :data_control
-    post "/data_control", Routes::PreferencesRoute, :update_data_control
-
-    # User account management
-    get "/change_password", Routes::Account, :get_change_password
-    post "/change_password", Routes::Account, :post_change_password
-    get "/delete_account", Routes::Account, :get_delete
-    post "/delete_account", Routes::Account, :post_delete
-    get "/clear_watch_history", Routes::Account, :get_clear_history
-    post "/clear_watch_history", Routes::Account, :post_clear_history
-    get "/authorize_token", Routes::Account, :get_authorize_token
-    post "/authorize_token", Routes::Account, :post_authorize_token
-    get "/token_manager", Routes::Account, :token_manager
-    post "/token_ajax", Routes::Account, :token_ajax
-    post "/subscription_ajax", Routes::Subscriptions, :toggle_subscription
-    get "/subscription_manager", Routes::Subscriptions, :subscription_manager
-  end
-
-  def register_iv_playlist_routes
-    get "/create_playlist", Routes::Playlists, :new
-    post "/create_playlist", Routes::Playlists, :create
-    get "/subscribe_playlist", Routes::Playlists, :subscribe
-    get "/delete_playlist", Routes::Playlists, :delete_page
-    post "/delete_playlist", Routes::Playlists, :delete
-    get "/edit_playlist", Routes::Playlists, :edit
-    post "/edit_playlist", Routes::Playlists, :update
-    get "/add_playlist_items", Routes::Playlists, :add_playlist_items_page
-    post "/playlist_ajax", Routes::Playlists, :playlist_ajax
-  end
-
-  def register_feed_routes
-    # Feeds
-    get "/view_all_playlists", Routes::Feeds, :view_all_playlists_redirect
-    get "/feed/playlists", Routes::Feeds, :playlists
-    get "/feed/popular", Routes::Feeds, :popular
-    get "/feed/trending", Routes::Feeds, :trending
-    get "/feed/subscriptions", Routes::Feeds, :subscriptions
-    get "/feed/history", Routes::Feeds, :history
-
-    # RSS Feeds
-    get "/feed/channel/:ucid", Routes::Feeds, :rss_channel
-    get "/feed/private", Routes::Feeds, :rss_private
-    get "/feed/playlist/:plid", Routes::Feeds, :rss_playlist
-    get "/feeds/videos.xml", Routes::Feeds, :rss_videos
-  end
-
-  # -------------------
-  #  Youtube routes
-  # -------------------
-
-  def register_channel_routes
-    get "/channel/:ucid", Routes::Channels, :home
-    get "/channel/:ucid/home", Routes::Channels, :home
-    get "/channel/:ucid/videos", Routes::Channels, :videos
-    get "/channel/:ucid/playlists", Routes::Channels, :playlists
-    get "/channel/:ucid/community", Routes::Channels, :community
-    get "/channel/:ucid/about", Routes::Channels, :about
-    get "/channel/:ucid/live", Routes::Channels, :live
-    get "/user/:user/live", Routes::Channels, :live
-    get "/c/:user/live", Routes::Channels, :live
-
-    ["", "/videos", "/playlists", "/community", "/about"].each do |path|
-      # /c/LinusTechTips
-      get "/c/:user#{path}", Routes::Channels, :brand_redirect
-      # /user/linustechtips | Not always the same as /c/
-      get "/user/:user#{path}", Routes::Channels, :brand_redirect
-      # /attribution_link?a=anything&u=/channel/UCZYTClx2T1of7BRZ86-8fow
-      get "/attribution_link#{path}", Routes::Channels, :brand_redirect
-      # /profile?user=linustechtips
-      get "/profile/#{path}", Routes::Channels, :profile
-    end
-  end
-
-  def register_watch_routes
-    get "/watch", Routes::Watch, :handle
-    post "/watch_ajax", Routes::Watch, :mark_watched
-    get "/watch/:id", Routes::Watch, :redirect
-    get "/shorts/:id", Routes::Watch, :redirect
-    get "/clip/:clip", Routes::Watch, :clip
-    get "/w/:id", Routes::Watch, :redirect
-    get "/v/:id", Routes::Watch, :redirect
-    get "/e/:id", Routes::Watch, :redirect
-
-    post "/download", Routes::Watch, :download
-
-    get "/embed/", Routes::Embed, :redirect
-    get "/embed/:id", Routes::Embed, :show
-  end
-
-  def register_yt_playlist_routes
-    get "/playlist", Routes::Playlists, :show
-    get "/mix", Routes::Playlists, :mix
-    get "/watch_videos", Routes::Playlists, :watch_videos
-  end
-
-  def register_search_routes
-    get "/opensearch.xml", Routes::Search, :opensearch
-    get "/results", Routes::Search, :results
-    get "/search", Routes::Search, :search
-    get "/hashtag/:hashtag", Routes::Search, :hashtag
-  end
-
   # -------------------
   #  Media proxy routes
   # -------------------
@@ -189,16 +46,6 @@ module Invidious::Routing
 
     get "/latest_version", Routes::VideoPlayback, :latest_version
   end
-
-  def register_image_routes
-    get "/ggpht/*", Routes::Images, :ggpht
-    options "/sb/:authority/:id/:storyboard/:index", Routes::Images, :options_storyboard
-    get "/sb/:authority/:id/:storyboard/:index", Routes::Images, :get_storyboard
-    get "/s_p/:id/:name", Routes::Images, :s_p_image
-    get "/yts/img/:name", Routes::Images, :yts_image
-    get "/vi/:id/:name", Routes::Images, :thumbnails
-  end
-
   # -------------------
   #  API routes
   # -------------------

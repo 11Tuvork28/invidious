@@ -81,43 +81,6 @@ SOFTWARE = {
 
 YT_POOL = YoutubeConnectionPool.new(YT_URL, capacity: CONFIG.pool_size, use_quic: CONFIG.use_quic)
 
-# CLI
-Kemal.config.extra_options do |parser|
-  parser.banner = "Usage: invidious [arguments]"
-  parser.on("-c THREADS", "--channel-threads=THREADS", "Number of threads for refreshing channels (default: #{CONFIG.channel_threads})") do |number|
-    begin
-      CONFIG.channel_threads = number.to_i
-    rescue ex
-      puts "THREADS must be integer"
-      exit
-    end
-  end
-  parser.on("-f THREADS", "--feed-threads=THREADS", "Number of threads for refreshing feeds (default: #{CONFIG.feed_threads})") do |number|
-    begin
-      CONFIG.feed_threads = number.to_i
-    rescue ex
-      puts "THREADS must be integer"
-      exit
-    end
-  end
-  parser.on("-o OUTPUT", "--output=OUTPUT", "Redirect output (default: #{CONFIG.output})") do |output|
-    CONFIG.output = output
-  end
-  parser.on("-l LEVEL", "--log-level=LEVEL", "Log level, one of #{LogLevel.values} (default: #{CONFIG.log_level})") do |log_level|
-    CONFIG.log_level = LogLevel.parse(log_level)
-  end
-  parser.on("-v", "--version", "Print version") do
-    puts SOFTWARE.to_pretty_json
-    exit
-  end
-  parser.on("--migrate", "Run any migrations (beta, use at your own risk!!") do
-    Invidious::Database::Migrator.new(PG_DB).migrate
-    exit
-  end
-end
-
-Kemal::CLI.new ARGV
-
 if CONFIG.output.upcase != "STDOUT"
   FileUtils.mkdir_p(File.dirname(CONFIG.output))
 end
@@ -126,21 +89,6 @@ LOGGER = Invidious::LogHandler.new(OUTPUT, CONFIG.log_level)
 
 # Check table integrity
 Invidious::Database.check_integrity(CONFIG)
-
-{% if !flag?(:skip_videojs_download) %}
-  # Resolve player dependencies. This is done at compile time.
-  #
-  # Running the script by itself would show some colorful feedback while this doesn't.
-  # Perhaps we should just move the script to runtime in order to get that feedback?
-
-  {% puts "\nChecking player dependencies, this may take more than 20 minutes... If it is stuck, check your internet connection.\n" %}
-  {% if flag?(:minified_player_dependencies) %}
-    {% puts run("../scripts/fetch-player-dependencies.cr", "--minified").stringify %}
-  {% else %}
-    {% puts run("../scripts/fetch-player-dependencies.cr").stringify %}
-  {% end %}
-  {% puts "\nDone checking player dependencies, now compiling Invidious...\n" %}
-{% end %}
 
 # Start jobs
 

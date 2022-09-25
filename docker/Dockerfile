@@ -45,9 +45,8 @@ RUN mv -n config/config.example.yml config/config.yml
 RUN sed -i 's/host: \(127.0.0.1\|localhost\)/host: invidious-db/' config/config.yml
 COPY ./config/sql/ ./config/sql/
 COPY ./locales/ ./locales/
-COPY --from=builder /invidious/assets ./assets/
 COPY --from=builder /invidious/invidious .
-RUN chmod o+rX -R ./assets ./config ./locales
+RUN chmod o+rX -R ./config ./locales
 
 EXPOSE 3000
 USER invidious
