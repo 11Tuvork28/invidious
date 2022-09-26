@@ -20,6 +20,7 @@ module Invidious::Routing
     self.register_api_manifest_routes
     self.register_video_playback_routes
   end
+
   # -------------------
   #  Media proxy routes
   # -------------------
@@ -46,6 +47,7 @@ module Invidious::Routing
 
     get "/latest_version", Routes::VideoPlayback, :latest_version
   end
+
   # -------------------
   #  API routes
   # -------------------
