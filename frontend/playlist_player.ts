@@ -51,7 +51,7 @@ class PlaylistData {
   private wasLoadedBefore: boolean;
   private offsets: Record<string, number>;
   private isCustom: boolean;
-  private previousTrack!: Track;
+  private playedTrackIndecies: Array<number>;
 
   constructor() {
     this.loop_all = false;
@@ -63,6 +63,7 @@ class PlaylistData {
     this.wasLoadedBefore = false;
     this.offsets = {};
     this.isCustom = false;
+    this.playedTrackIndecies = [];
   }
   fromJson(playerData: PlaylistData): PlaylistData {
     this.loop_all = playerData.loop_all;
@@ -74,7 +75,7 @@ class PlaylistData {
     this.wasLoadedBefore = true;
     this.offsets = playerData.offsets;
     this.isCustom = playerData.isCustom;
-    this.previousTrack = playerData.previousTrack;
+    this.playedTrackIndecies = playerData.playedTrackIndecies;
     return this;
   }
   toJson(): PlaylistData {
@@ -88,7 +89,7 @@ class PlaylistData {
   }
   nextTrack(): number | undefined {
     let trackIndex = 0;
-    this.previousTrack = this.getCurrentTrack();
+    this.playedTrackIndecies.push(this.trackIndex);
     this.tracks[this.trackIndex].played = true;
     if (this.shuffle) {
       if (this.tracks.length - 1 == this.trackIndex) return undefined;
@@ -104,8 +105,7 @@ class PlaylistData {
     return trackIndex;
   }
   previous() {
-    if (this.previousTrack == undefined) return 0;
-    return this.tracks.findIndex((track) => track.id == this.previousTrack.id);
+    return this.playedTrackIndecies.pop()
   }
   addTrack(track: Track, playNext: boolean) {
     if (this.trackIndex >= this.tracks.length || !playNext)
@@ -331,6 +331,7 @@ class PlaylistManager {
   }
   prev() {
     let index = this.playerData.previous();
+    if (index == undefined) return
     let track = this.playerData.getTrackByIndex(index);
     this.toLocalStorage();
     let url = this.buildUrl(track.id, index);

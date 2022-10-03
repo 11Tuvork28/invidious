@@ -631,7 +631,7 @@ addEventListener('keydown', function (e) {
             break;
         case 'P':
         case 'MediaTrackPrevious':
-            action = playlistManager.prev;
+            playlistManager.prev.call(window.playlistManager);
             break;
 
         // TODO: More precise step. Now FPS is taken equal to 29.97
