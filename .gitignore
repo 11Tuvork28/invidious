@@ -8,3 +8,4 @@
 /sentry
 /config/config.yml
 /assets/js/*.js
+!/assets/js/*.min.js
