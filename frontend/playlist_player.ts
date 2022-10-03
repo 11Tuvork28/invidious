@@ -403,9 +403,6 @@ class PlaylistManager {
       this.playlistNode.childNodes[1].childNodes[0].appendChild(trackHtml);
     }
     this.playerData.setInnerHtml(this.playlistNode.innerHTML, false);
-    // If playNext is to be implemented, we need to return the index of the added track for later use.
-    this.playerData.addTrack(track, false);
-
     this.playerData.setPlayingIndex();
     this.toLocalStorage();
   }
