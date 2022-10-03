@@ -1318,8 +1318,8 @@ def process_video_params(query, preferences)
     volume:                                        volume,
     vr_mode:                                       vr_mode,
     save_player_pos:                               save_player_pos,
-    exclude_music_save_player_pos: exclude_music_save_player_pos,
-    disable_new_playlist_player:                       disable_new_playlist_player,
+    exclude_music_save_player_pos:                 exclude_music_save_player_pos,
+    disable_new_playlist_player:                   disable_new_playlist_player,
   })
 
   return params
