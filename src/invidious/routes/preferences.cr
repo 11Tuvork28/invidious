@@ -78,13 +78,13 @@ module Invidious::Routes::PreferencesRoute
     save_player_pos ||= "off"
     save_player_pos = save_player_pos == "on"
 
-    enable_exclude_save_player_pos_for_few_genres = env.params.body["enable_exclude_save_player_pos_for_few_genres"]?.try &.as(String)
-    enable_exclude_save_player_pos_for_few_genres ||= "off"
-    enable_exclude_save_player_pos_for_few_genres = enable_exclude_save_player_pos_for_few_genres == "on"
+    exclude_music_save_player_pos = env.params.body["exclude_music_save_player_pos"]?.try &.as(String)
+    exclude_music_save_player_pos ||= "off"
+    exclude_music_save_player_pos = exclude_music_save_player_pos == "on"
 
-    always_shuffle_playlist = env.params.body["always_shuffle_playlist"]?.try &.as(String)
-    always_shuffle_playlist ||= "off"
-    always_shuffle_playlist = always_shuffle_playlist == "on"
+    disable_new_playlist_player = env.params.body["disable_new_playlist_player"]?.try &.as(String)
+    disable_new_playlist_player ||= "off"
+    disable_new_playlist_player = disable_new_playlist_player == "on"
 
     show_nick = env.params.body["show_nick"]?.try &.as(String)
     show_nick ||= "off"
@@ -183,8 +183,8 @@ module Invidious::Routes::PreferencesRoute
       vr_mode:                                       vr_mode,
       show_nick:                                     show_nick,
       save_player_pos:                               save_player_pos,
-      enable_exclude_save_player_pos_for_few_genres: enable_exclude_save_player_pos_for_few_genres,
-      always_shuffle_playlist:                       always_shuffle_playlist,
+      exclude_music_save_player_pos: exclude_music_save_player_pos,
+      disable_new_playlist_player:                       disable_new_playlist_player,
     }.to_json)
 
     if user = env.get? "user"

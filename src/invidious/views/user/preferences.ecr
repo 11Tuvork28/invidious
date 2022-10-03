@@ -121,12 +121,12 @@
                 <input name="save_player_pos" id="save_player_pos" type="checkbox" <% if preferences.save_player_pos %>checked<% end %>>
             </div>
             <div class="pure-control-group">
-                <label for="enable_exclude_save_player_pos_for_few_genres"><%= translate(locale, "preferences_enable_exclude_save_player_pos_for_few_genres") %></label>
-                <input name="enable_exclude_save_player_pos_for_few_genres" id="enable_exclude_save_player_pos_for_few_genres" type="checkbox" <% if preferences.enable_exclude_save_player_pos_for_few_genres %>checked<% end %>>
+                <label for="exclude_music_save_player_pos"><%= translate(locale, "preferences_exclude_music_save_player_pos") %></label>
+                <input name="exclude_music_save_player_pos" id="exclude_music_save_player_pos" type="checkbox" <% if preferences.exclude_music_save_player_pos %>checked<% end %>>
             </div>
             <div class="pure-control-group">
-                <label for="always_shuffle_playlist"><%= translate(locale, "preferences_always_shuffle_playlist") %></label>
-                <input name="always_shuffle_playlist" id="always_shuffle_playlist" type="checkbox" <% if preferences.always_shuffle_playlist %>checked<% end %>>
+                <label for="disable_new_playlist_player"><%= translate(locale, "preferences_disable_new_playlist_player") %></label>
+                <input name="disable_new_playlist_player" id="disable_new_playlist_player" type="checkbox" <% if preferences.disable_new_playlist_player %>checked<% end %>>
             </div>
             <legend><%= translate(locale, "preferences_category_visual") %></legend>
 

@@ -270,8 +270,8 @@ struct VideoPreferences
   property volume : Int32
   property vr_mode : Bool
   property save_player_pos : Bool
-  property enable_exclude_save_player_pos_for_few_genres : Bool
-  property always_shuffle_playlist : Bool
+  property exclude_music_save_player_pos : Bool
+  property disable_new_playlist_player : Bool
 end
 
 struct Video
@@ -1206,8 +1206,8 @@ def process_video_params(query, preferences)
   volume = query["volume"]?.try &.to_i?
   vr_mode = query["vr_mode"]?.try { |q| (q == "true" || q == "1").to_unsafe }
   save_player_pos = query["save_player_pos"]?.try { |q| (q == "true" || q == "1").to_unsafe }
-  enable_exclude_save_player_pos_for_few_genres = query["enable_exclude_save_player_pos_for_few_genres"]?.try { |q| (q == "true" || q == "1").to_unsafe }
-  always_shuffle_playlist = query["always_shuffle_playlist"]?.try { |q| (q == "true" || q == "1").to_unsafe }
+  exclude_music_save_player_pos = query["exclude_music_save_player_pos"]?.try { |q| (q == "true" || q == "1").to_unsafe }
+  disable_new_playlist_player = query["disable_new_playlist_player"]?.try { |q| (q == "true" || q == "1").to_unsafe }
 
   if preferences
     # region ||= preferences.region
@@ -1229,8 +1229,8 @@ def process_video_params(query, preferences)
     volume ||= preferences.volume
     vr_mode ||= preferences.vr_mode.to_unsafe
     save_player_pos ||= preferences.save_player_pos.to_unsafe
-    enable_exclude_save_player_pos_for_few_genres ||= preferences.enable_exclude_save_player_pos_for_few_genres.to_unsafe
-    always_shuffle_playlist ||= preferences.always_shuffle_playlist.to_unsafe
+    exclude_music_save_player_pos ||= preferences.exclude_music_save_player_pos.to_unsafe
+    disable_new_playlist_player ||= preferences.disable_new_playlist_player.to_unsafe
   end
 
   annotations ||= CONFIG.default_user_preferences.annotations.to_unsafe
@@ -1251,8 +1251,8 @@ def process_video_params(query, preferences)
   volume ||= CONFIG.default_user_preferences.volume
   vr_mode ||= CONFIG.default_user_preferences.vr_mode.to_unsafe
   save_player_pos ||= CONFIG.default_user_preferences.save_player_pos.to_unsafe
-  enable_exclude_save_player_pos_for_few_genres ||= CONFIG.default_user_preferences.enable_exclude_save_player_pos_for_few_genres.to_unsafe
-  always_shuffle_playlist ||= CONFIG.default_user_preferences.always_shuffle_playlist.to_unsafe
+  exclude_music_save_player_pos ||= CONFIG.default_user_preferences.exclude_music_save_player_pos.to_unsafe
+  disable_new_playlist_player ||= CONFIG.default_user_preferences.disable_new_playlist_player.to_unsafe
 
   annotations = annotations == 1
   autoplay = autoplay == 1
@@ -1265,8 +1265,8 @@ def process_video_params(query, preferences)
   extend_desc = extend_desc == 1
   vr_mode = vr_mode == 1
   save_player_pos = save_player_pos == 1
-  enable_exclude_save_player_pos_for_few_genres = enable_exclude_save_player_pos_for_few_genres == 1
-  always_shuffle_playlist = always_shuffle_playlist == 1
+  exclude_music_save_player_pos = exclude_music_save_player_pos == 1
+  disable_new_playlist_player = disable_new_playlist_player == 1
 
   if CONFIG.disabled?("dash") && quality == "dash"
     quality = "high"
@@ -1318,8 +1318,8 @@ def process_video_params(query, preferences)
     volume:                                        volume,
     vr_mode:                                       vr_mode,
     save_player_pos:                               save_player_pos,
-    enable_exclude_save_player_pos_for_few_genres: enable_exclude_save_player_pos_for_few_genres,
-    always_shuffle_playlist:                       always_shuffle_playlist,
+    exclude_music_save_player_pos: exclude_music_save_player_pos,
+    disable_new_playlist_player:                       disable_new_playlist_player,
   })
 
   return params

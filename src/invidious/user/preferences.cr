@@ -55,8 +55,8 @@ struct Preferences
   property extend_desc : Bool = CONFIG.default_user_preferences.extend_desc
   property volume : Int32 = CONFIG.default_user_preferences.volume
   property save_player_pos : Bool = CONFIG.default_user_preferences.save_player_pos
-  property enable_exclude_save_player_pos_for_few_genres : Bool = CONFIG.default_user_preferences.enable_exclude_save_player_pos_for_few_genres
-  property always_shuffle_playlist : Bool = CONFIG.default_user_preferences.always_shuffle_playlist
+  property exclude_music_save_player_pos : Bool = CONFIG.default_user_preferences.exclude_music_save_player_pos
+  property disable_new_playlist_player : Bool = CONFIG.default_user_preferences.disable_new_playlist_player
 
   module BoolToString
     def self.to_json(value : String, json : JSON::Builder)

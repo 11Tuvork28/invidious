@@ -44,8 +44,8 @@ struct ConfigPreferences
   property vr_mode : Bool = true
   property show_nick : Bool = true
   property save_player_pos : Bool = true
-  property enable_exclude_save_player_pos_for_few_genres : Bool = false
-  property always_shuffle_playlist : Bool = false
+  property exclude_music_save_player_pos : Bool = false
+  property disable_new_playlist_player : Bool = false
 
   def to_tuple
     {% begin %}

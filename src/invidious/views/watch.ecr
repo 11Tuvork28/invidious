@@ -341,5 +341,7 @@ we're going to need to do it here in order to allow for translations.
         </div>
     <% end %>
 </div>
-<script src="/js/playlist_player.js"></script>
+<% if !preferences.disable_new_playlist_player %>
+    <script src="/js/playlist_player.js"></script>
+<% end %>
 <script src="/js/watch.js?v=<%= ASSET_COMMIT %>"></script>
