@@ -94,8 +94,11 @@ class PlaylistData {
     if (this.shuffle) {
       if (this.tracks.length - 1 == this.trackIndex) return undefined;
       else {
-        while (this.tracks[trackIndex].played) {
+        let i =0;
+        // This reads weird but essentially its false by default so we check against it.
+        while (this.tracks[trackIndex].played && i > this.tracks.length) {
           trackIndex = Math.floor(Math.random() * this.tracks.length - 1);
+          i++;
         }
       }
     } else if (this.loop_all && this.trackIndex == this.tracks.length - 1) {
@@ -120,7 +123,7 @@ class PlaylistData {
     doc
       .getElementsByClassName("pure-menu-list")[0]
       .childNodes.forEach((node) => {
-        if ((node as Element).localName == "li" && (node as Element).id != "") {
+        if ((node as Element).localName == "li" && (node as Element).id != "" && (node.childNodes[1].childNodes[3]as Element).innerHTML != "[Deleted video]") {
           this.tracks.push(new Track((node as Element).id));
         }
       });
@@ -166,6 +169,7 @@ class PlaylistData {
       Number.isNaN(nRawIndex) || nRawIndex > this.tracks.length - 1
         ? this.tracks.findIndex((track) => track.id == vId)
         : nRawIndex;
+    if (index = -1) index =0;
     this.trackIndex = index;
     // We need to set the offset anyway, since we don't call setOffset() directly from the player object.
     this.setOffset();
@@ -276,17 +280,21 @@ class PlaylistManager {
   }
   tryToLoadCustomPlaylist() {
     if (this.plid.length == 0) {
+      const plid = window.helpers.storage.get("lastPlaylistID");
+      if (plid != "customPlaylist") return; // We only want to do this on modified playlists
       const playerData: PlaylistData =
         window.helpers.storage.get("playlistPlayerData")[
-          window.helpers.storage.get("lastPlaylistID")
+          plid
         ];
       if (playerData == undefined) return;
       this.hasPlaylist = true;
-      this.plid = "customPlaylist";
+      this.plid = plid;
       document.getElementById("autoplay-controls")!.style.display = "none";
       this.createPlaylistNode(true);
-      this.playerData = this.readFromLocalStorage();
-      this.loadPlaylist();
+      this.playerData = new PlaylistData().fromJson(playerData);
+      this.playlistNode.innerHTML = this.playerData.getInnerHTML()!;
+      this.playerData.setPlayingIndex();
+      this.toLocalStorage();
     }
   }
   private buildUrl(video_id: string, index: number) {
