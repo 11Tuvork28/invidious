@@ -162,10 +162,10 @@ class PlaylistData {
     );
     const vId = new URLSearchParams(window.location.search).get("v")!;
     // Here rescue the index in case we got gibberish and fallback to getting the index of the video which is expensive.
-    let index = Number.isNaN(nRawIndex)
+    let index = Number.isNaN(nRawIndex) || nRawIndex > this.tracks.length - 1
       ? this.tracks.findIndex((track) => track.id == vId)
       : nRawIndex;
-    this.trackIndex = index;
+   this.trackIndex = index;
     // We need to set the offset anyway, since we don't call setOffset() directly from the player object.
     this.setOffset();
   }
