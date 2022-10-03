@@ -66,16 +66,16 @@ class PlaylistData {
     this.playedTrackIndecies = [];
   }
   fromJson(playerData: PlaylistData): PlaylistData {
-    this.loop_all = playerData.loop_all;
-    this.shuffle = playerData.shuffle;
-    this.tracks = playerData.tracks;
-    this.trackIndex = playerData.trackIndex;
-    this.innerHtml = playerData.innerHtml;
-    this.playlistId = playerData.playlistId;
+    this.loop_all = playerData.loop_all || false;
+    this.shuffle = playerData.shuffle || false;
+    this.tracks = playerData.tracks || [];
+    this.trackIndex = playerData.trackIndex || 0;
+    this.innerHtml = playerData.innerHtml || "";
+    this.playlistId = playerData.playlistId || "";
     this.wasLoadedBefore = true;
-    this.offsets = playerData.offsets;
-    this.isCustom = playerData.isCustom;
-    this.playedTrackIndecies = playerData.playedTrackIndecies;
+    this.offsets = playerData.offsets || {};
+    this.isCustom = playerData.isCustom || false;
+    this.playedTrackIndecies = playerData.playedTrackIndecies || [];
     return this;
   }
   toJson(): PlaylistData {
