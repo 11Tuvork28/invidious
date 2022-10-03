@@ -28,7 +28,38 @@
 <meta name="twitter:player:width" content="1280">
 <meta name="twitter:player:height" content="720">
 <link rel="alternate" href="https://www.youtube.com/watch?v=<%= video.id %>">
-<%= rendered "components/player_sources" %>
+<link rel="stylesheet" href="https://static.xamh.de/videojs/video.js/video-js.css?v=<%= ASSET_COMMIT %>">
+<link rel="stylesheet" href="https://static.xamh.de/videojs/videojs-http-source-selector/videojs-http-source-selector.css?v=<%= ASSET_COMMIT %>">
+<link rel="stylesheet" href="https://static.xamh.de/videojs/videojs-markers/videojs.markers.css?v=<%= ASSET_COMMIT %>">
+<link rel="stylesheet" href="https://static.xamh.de/videojs/videojs-share/videojs-share.css?v=<%= ASSET_COMMIT %>">
+<link rel="stylesheet" href="https://static.xamh.de/videojs/videojs-vtt-thumbnails/videojs-vtt-thumbnails.css?v=<%= ASSET_COMMIT %>">
+<link rel="stylesheet" href="https://static.xamh.de/videojs/videojs-mobile-ui/videojs-mobile-ui.css?v=<%= ASSET_COMMIT %>">
+<link rel="stylesheet" href="https://static.xamh.de/css/player.css?v=<%= ASSET_COMMIT %>">
+
+<script src="https://static.xamh.de/videojs/video.js/video.js?v=<%= ASSET_COMMIT %>"></script>
+<script src="https://static.xamh.de/videojs/videojs-mobile-ui/videojs-mobile-ui.js?v=<%= ASSET_COMMIT %>"></script>
+<script src="https://static.xamh.de/videojs/videojs-contrib-quality-levels/videojs-contrib-quality-levels.js?v=<%= ASSET_COMMIT %>"></script>
+<script src="https://static.xamh.de/videojs/videojs-http-source-selector/videojs-http-source-selector.js?v=<%= ASSET_COMMIT %>"></script>
+<script src="https://static.xamh.de/videojs/videojs-markers/videojs-markers.js?v=<%= ASSET_COMMIT %>"></script>
+<script src="https://static.xamh.de/videojs/videojs-share/videojs-share.js?v=<%= ASSET_COMMIT %>"></script>
+<script src="https://static.xamh.de/videojs/videojs-vtt-thumbnails/videojs-vtt-thumbnails.js?v=<%= ASSET_COMMIT %>"></script>
+
+
+<% if params.annotations %>
+    <link rel="stylesheet" href="https://static.xamh.de/css/videojs-youtube-annotations.min.css?v=<%= ASSET_COMMIT %>">
+    <script src="https://static.xamh.de/js/videojs-youtube-annotations.min.js?v=<%= ASSET_COMMIT %>"></script>
+<% end %>
+
+<% if params.listen || params.quality != "dash" %>
+    <link rel="stylesheet" href="https://static.xamh.de/css/quality-selector.css?v=<%= ASSET_COMMIT %>">
+    <script src="https://static.xamh.de/js/silvermine-videojs-quality-selector.min.js?v=<%= ASSET_COMMIT %>"></script>
+<% end %>
+
+<% if !params.listen && params.vr_mode %>
+    <link rel="stylesheet" href="https://static.xamh.de/videojs/videojs-vr/videojs-vr.css?v=<%= ASSET_COMMIT %>">
+    <script src="https://static.xamh.de/videojs/videojs-vr/videojs-vr.js?v=<%= ASSET_COMMIT %>"></script>
+<% end %>
+
 <title><%= title %> - Invidious</title>
 
 <!-- Description expansion also updates the 'Show more' button to 'Show less' so
@@ -302,7 +333,6 @@ we're going to need to do it here in order to allow for translations.
                                     %></b>
                                 </div>
                             </h5>
-                            <button class="pure-button pure-button-primary">Add to current playlist.</button>
                         </div>
                         <% end %>
                     <% end %>
