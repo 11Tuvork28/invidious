@@ -105,7 +105,7 @@ class PlaylistData {
     return trackIndex;
   }
   previous() {
-    return this.playedTrackIndecies.pop()
+    return this.playedTrackIndecies.pop();
   }
   addTrack(track: Track, playNext: boolean) {
     if (this.trackIndex >= this.tracks.length || !playNext)
@@ -162,10 +162,11 @@ class PlaylistData {
     );
     const vId = new URLSearchParams(window.location.search).get("v")!;
     // Here rescue the index in case we got gibberish and fallback to getting the index of the video which is expensive.
-    let index = Number.isNaN(nRawIndex) || nRawIndex > this.tracks.length - 1
-      ? this.tracks.findIndex((track) => track.id == vId)
-      : nRawIndex;
-   this.trackIndex = index;
+    let index =
+      Number.isNaN(nRawIndex) || nRawIndex > this.tracks.length - 1
+        ? this.tracks.findIndex((track) => track.id == vId)
+        : nRawIndex;
+    this.trackIndex = index;
     // We need to set the offset anyway, since we don't call setOffset() directly from the player object.
     this.setOffset();
   }
@@ -275,9 +276,10 @@ class PlaylistManager {
   }
   tryToLoadCustomPlaylist() {
     if (this.plid.length == 0) {
-      const playerData: PlaylistData = window.helpers.storage.get(
-        "playlistPlayerData"
-      )[window.helpers.storage.get('lastPlaylistID')]
+      const playerData: PlaylistData =
+        window.helpers.storage.get("playlistPlayerData")[
+          window.helpers.storage.get("lastPlaylistID")
+        ];
       if (playerData == undefined) return;
       this.hasPlaylist = true;
       this.plid = "customPlaylist";
@@ -314,15 +316,17 @@ class PlaylistManager {
   }
   next() {
     let index = this.playerData.nextTrack();
-    if (index === undefined){
-      // Here we look if autoplay is enabled and if so we jump to next video while 
+    if (index === undefined) {
+      // Here we look if autoplay is enabled and if so we jump to next video while
       //adding it to playlist for convenience
-      if(this.videoData.params.autoplay || this.videoData.params.continue_autoplay){
-        this.addVideo('rv%'+ this.videoData.next_video);// Since its inserted at the last position we can just take the last index
+      if (
+        this.videoData.params.autoplay ||
+        this.videoData.params.continue_autoplay
+      ) {
+        this.addVideo("rv%" + this.videoData.next_video); // Since its inserted at the last position we can just take the last index
         index = this.playerData.getTrackCount();
         this.toLocalStorage();
-      }else
-      return;
+      } else return;
     }
     let track = this.playerData.getTrackByIndex(index);
     this.toLocalStorage();
@@ -331,7 +335,7 @@ class PlaylistManager {
   }
   prev() {
     let index = this.playerData.previous();
-    if (index == undefined) return
+    if (index == undefined) return;
     let track = this.playerData.getTrackByIndex(index);
     this.toLocalStorage();
     let url = this.buildUrl(track.id, index);
@@ -357,51 +361,51 @@ class PlaylistManager {
     // Cant be null! Because if this is null, alot broke in invidious since there would a related video without and id.
     track.FromDivElement(
       document.getElementById("rv%" + video_id)! as HTMLDivElement
-      );
-      // Static string
-      let innerHTML = this.playerData.getInnerHTML();
-      const queryParams = [
-        "listCustom=" + this.plid,
-        this.playerData.isCustomPlaylist()
+    );
+    // Static string
+    let innerHTML = this.playerData.getInnerHTML();
+    const queryParams = [
+      "listCustom=" + this.plid,
+      this.playerData.isCustomPlaylist()
         ? "indexCustom=" + this.playerData.getTrackCount()
         : "index=" + this.playerData.getTrackCount(),
-      ];
-      if (innerHTML === undefined || innerHTML === null || innerHTML === "") {
-        innerHTML =
+    ];
+    if (innerHTML === undefined || innerHTML === null || innerHTML === "") {
+      innerHTML =
         '<h3><a>Current Playlist</a></h3><div class="pure-menu pure-menu-scrollable playlist-restricted"><ol class="pure-menu-list"></ol></div><hr>';
-        let parser = new DOMParser();
-        let doc = parser.parseFromString(innerHTML, "text/html");
-        doc.body.childNodes[1].childNodes[0].appendChild(
-          track.toHtml(queryParams)[0]
-          );
-          this.playlistNode.innerHTML = doc.body.innerHTML;
-          this.playerData.setInnerHtml(doc.body.innerHTML);
-        } else {
-          let trackHtml = track.toHtml(queryParams)[0];
-          this.playlistNode.childNodes[2].childNodes[1].appendChild(trackHtml);
-          this.playerData.setInnerHtml(this.playlistNode.innerHTML)
-          // If playNext is to be implemented, we need to return the index of the added track for later use.
-          this.playerData.addTrack(track, false);
-        }
-        this.playerData.setPlayingIndex();
-        this.toLocalStorage();
+      let parser = new DOMParser();
+      let doc = parser.parseFromString(innerHTML, "text/html");
+      doc.body.childNodes[1].childNodes[0].appendChild(
+        track.toHtml(queryParams)[0]
+      );
+      this.playlistNode.innerHTML = doc.body.innerHTML;
+      this.playerData.setInnerHtml(doc.body.innerHTML);
+    } else {
+      let trackHtml = track.toHtml(queryParams)[0];
+      this.playlistNode.childNodes[2].childNodes[1].appendChild(trackHtml);
+      this.playerData.setInnerHtml(this.playlistNode.innerHTML);
+      // If playNext is to be implemented, we need to return the index of the added track for later use.
+      this.playerData.addTrack(track, false);
+    }
+    this.playerData.setPlayingIndex();
+    this.toLocalStorage();
   }
   hasAPlaylistLoaded() {
     return this.hasPlaylist;
   }
   private createPlaylistNode(addControls: boolean) {
-        if (addControls) {
-          const div: HTMLElement = document.getElementById("related-videos")!;
-          const playlistDiv = new DOMParser().parseFromString(
-            '<div><label for="loop">Loop Playlist</label><input name="loop" id="loop" type="checkbox"><label for="shuffle">Shuffle Playlist</label><input name="shuffle" id="shuffle" type="checkbox"><div id="playlist" class="h-box"></div></div>',
-            "text/html"
-            );
-            div.insertBefore(
-              playlistDiv.body.childNodes[0],
-              div.childNodes[0].nextSibling
-              );
-            }
-            this.playlistNode = document.getElementById("playlist")!;
+    if (addControls) {
+      const div: HTMLElement = document.getElementById("related-videos")!;
+      const playlistDiv = new DOMParser().parseFromString(
+        '<div><label for="loop">Loop Playlist</label><input name="loop" id="loop" type="checkbox"><label for="shuffle">Shuffle Playlist</label><input name="shuffle" id="shuffle" type="checkbox"><div id="playlist" class="h-box"></div></div>',
+        "text/html"
+      );
+      div.insertBefore(
+        playlistDiv.body.childNodes[0],
+        div.childNodes[0].nextSibling
+      );
+    }
+    this.playlistNode = document.getElementById("playlist")!;
   }
   private toLocalStorage() {
     try {
@@ -409,7 +413,7 @@ class PlaylistManager {
         window.helpers.storage.get("playlistPlayerData");
       playlists[this.plid] = this.playerData.toJson();
       window.helpers.storage.set("playlistPlayerData", playlists);
-      window.helpers.storag.set("lastPlaylistID", this.plid);
+      window.helpers.storage.set("lastPlaylistID", this.plid);
     } catch (error) {
       const saves: Record<string, PlaylistData> = {};
       saves[this.plid] = this.playerData.toJson();
@@ -417,16 +421,15 @@ class PlaylistManager {
     }
   }
   private readFromLocalStorage() {
-            try {
-              const playerData: PlaylistData = window.helpers.storage.get(
-                "playlistPlayerData"
-                )[this.plid == "" ? "customPlaylist" : this.plid] as PlaylistData;
+    try {
+      const playerData: PlaylistData = window.helpers.storage.get(
+        "playlistPlayerData"
+      )[this.plid == "" ? "customPlaylist" : this.plid] as PlaylistData;
       return new PlaylistData().fromJson(playerData);
     } catch (error) {
       console.log("Playlist does not exist!");
       return new PlaylistData();
     }
-  }
 }
 
 // HOOKS, we want to ts to ignore this so here we tell it to ignore it.
