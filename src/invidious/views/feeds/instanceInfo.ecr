@@ -1,0 +1,50 @@
+<% content_for "header" do %>
+    <title>Instance info - Invidious</title>
+<% end %>
+<div class="h-box">
+    <h2>Hi!</h2>
+    <p>Thanks for taking the time to read this and thank you for using my instance <3 </br>
+    I hope you like the experience, below is a list of custom changes made to this instance:
+    </p>
+    <ul>
+        <li>2022/10/02 - Changed layout so that the feeds are always shown, for a faster and more convenient navigation.</li>
+        <li>2022/10/02 - Created Instance info page + routes for it.</li>
+        <li>2022/10/02 - Rewrite of the enhanced playlist player, now fully tested and without errors.</li>
+        <li>2022/10/02 - Migration of the enhanced playlist player to Typescript.</li>
+        <li>2022/09/25 - Created API only branch and container image build pipeline in preparation of geo loadbalancing the api.</li>
+        <li>2022/09/8 - Initial version of the enhanced playlist player.</li>
+        <li>2022/09/8 - Added static file cdn for faster load times.</li>
+    </ul>
+    <p>The enhanced playlist player adds a few extra functions to the playlist:</p>
+    <ul>
+        <li>Looping/Shuffling</li>
+        <li>Songs/Videos can be added on the fly via related videos.</li>
+        <li>When Looping/Shuffling is disabled but continue autoplay is turned on, the next video is automatically enqued and added to playlist.</li>
+        <li>The shortcut 'shift+p' now plays the previous song/video, current limitation is that it can only be used once.</li>
+        <li>The shortcut 'shift+n' plays the next song/video depending on the settings this can be the next related video.</li>
+    </ul>
+    <h2>Other unique features</h2>
+    <ul>
+        <li>Exluding music from timestamp saving, meaning that the playback position does not get saved. Can be toggled on and off in the settings.</li>
+        <li><em>Coming soon</em>: Soundcloud like audio player! Stay tuned for this.</li>
+    </ul>
+    <h2>Donating</h2>
+    <p>If you like the work I'm doing here and you want to support it or generally just want be thankful, you can leave a donation. But you absolutly don't have to.</br>
+        Donting would help cover the server costs and would help me invest more time and get changes merged upstream.
+    </p>
+    <h2>More reasons?</h2>
+    <p>My instance handles about 2.2TB(2200GB) per day and about 25 requests per second. That has a cost, donating would really go long way of help me keep/upgrade the underlying infrastructure to give a even better experience.</p>
+    <p>
+    Whether you decide to donate or not; I'm truly thankful for taking your time to read this or even donating a piece of your money! <3
+    </p>
+    <h3>Cryptocurrencies</h3>
+    <ul>
+        <li>Monero: <a href="monero:43GsD8kyArZPZdCN9N9NLAS4TmnGEf29RMTXWLQD3DCyb5Ad4hqNrEfQyWdSXbaNU4Sq5WQ2UfSspeNVDNc5C6uzPqsfBCR">43GsD8kyArZPZdCN9N9NLAS4TmnGEf29RMTXWLQD3DCyb5Ad4hqNrEfQyWdSXbaNU4Sq5WQ2UfSspeNVDNc5C6uzPqsfBCR</a></li>
+    </ul>
+
+    <h2>Contact</h2>
+    <p>You have questions or want to give me feedback?</br>
+        You can either open an issue on the <a href="https://github.com/11tuvork28/invidious/issues" target="_blank">repository</a> of my fork or send me an email to <code>support[at]xamh.de</code>.</br>
+        I will do my best to answer quickly!
+    </p>
+</div>

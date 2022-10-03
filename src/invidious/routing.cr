@@ -18,6 +18,7 @@ module Invidious::Routing
   def register_all
     {% unless flag?(:api_only) %}
       get "/", Routes::Misc, :home
+      get "/info", Routes::Misc, :info
       get "/privacy", Routes::Misc, :privacy
       get "/licenses", Routes::Misc, :licenses
       get "/redirect", Routes::Misc, :cross_instance_redirect

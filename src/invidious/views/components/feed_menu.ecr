@@ -1,4 +1,7 @@
 <div class="feed-menu">
+    <a href="/info" class="feed-menu-item pure-menu-heading">
+      Instance Info
+     </a>
     <% feed_menu = env.get("preferences").as(Preferences).feed_menu.dup %>
     <% if !env.get?("user") %>
         <% feed_menu.reject! {|item| {"Subscriptions", "Playlists"}.includes? item} %>

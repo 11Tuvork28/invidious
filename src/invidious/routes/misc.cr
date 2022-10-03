@@ -28,6 +28,11 @@ module Invidious::Routes::Misc
     end
   end
 
+  def self.info(env)
+    locale = env.get("preferences").as(Preferences).locale
+    templated "feeds/instanceInfo"
+  end
+
   def self.privacy(env)
     locale = env.get("preferences").as(Preferences).locale
     templated "privacy"
