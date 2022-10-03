@@ -430,6 +430,7 @@ class PlaylistManager {
       console.log("Playlist does not exist!");
       return new PlaylistData();
     }
+  }
 }
 
 // HOOKS, we want to ts to ignore this so here we tell it to ignore it.
