@@ -20,6 +20,11 @@ class Track {
     ).innerText;
     return this;
   }
+  fromVideoData(video_data: Record<string, any>){
+    this.title = document.getElementById("contents")!.getElementsByTagName("h1")[0].innerText;
+    this.duration = (video_data.length_seconds / 60).toPrecision(3).replace(".", ":");
+    this.channelName = document.getElementById("channel-name")!.innerText
+  }
   toHtml(urlParams: Array<string>): NodeListOf<ChildNode> {
     return new DOMParser().parseFromString(
       '<li class="pure-menu-item" id="' +
@@ -52,6 +57,7 @@ class PlaylistData {
   private offsets: Record<string, number>;
   private isCustom: boolean;
   private playedTrackIndecies: Array<number>;
+  private playNextIndexOverwrite: number | undefined;
 
   constructor() {
     this.loop_all = false;
@@ -76,6 +82,8 @@ class PlaylistData {
     this.offsets = playerData.offsets || {};
     this.isCustom = playerData.isCustom || false;
     this.playedTrackIndecies = playerData.playedTrackIndecies || [];
+    this.playNextIndexOverwrite =
+      playerData.playNextIndexOverwrite || undefined;
     return this;
   }
   toJson(): PlaylistData {
@@ -88,13 +96,18 @@ class PlaylistData {
     return this.tracks[this.trackIndex];
   }
   nextTrack(): number | undefined {
+    if (this.playNextIndexOverwrite != undefined) {
+      let returnIndex = this.playNextIndexOverwrite;
+      this.playNextIndexOverwrite = undefined;
+      return returnIndex;
+    }
     let trackIndex = 0;
     this.playedTrackIndecies.push(this.trackIndex);
     this.tracks[this.trackIndex].played = true;
     if (this.shuffle) {
       if (this.tracks.length - 1 == this.trackIndex) return undefined;
       else {
-        let i =0;
+        let i = 0;
         // This reads weird but essentially its false by default so we check against it.
         while (this.tracks[trackIndex].played && i > this.tracks.length) {
           trackIndex = Math.floor(Math.random() * this.tracks.length - 1);
@@ -116,23 +129,30 @@ class PlaylistData {
     else this.tracks.splice(0, 0, track);
     this.addOffset(track);
   }
-  private parseResponse(playlistHtml: string) {
+  private parseResponse(playlistHtml: string,fromAPI: boolean) {
     this.tracks = []; // Need to reset it here because else we cause duplicates
     var parser = new DOMParser();
     var doc = parser.parseFromString(playlistHtml, "text/html");
     doc
       .getElementsByClassName("pure-menu-list")[0]
       .childNodes.forEach((node) => {
-        if ((node as Element).localName == "li" && (node as Element).id != "" && (node.childNodes[1].childNodes[3]as Element).innerHTML != "[Deleted video]") {
-          this.tracks.push(new Track((node as Element).id));
+        let title: string = "";
+        if (
+          (node as Element).localName == "li" &&
+          (node as Element).id != ""
+        ) {
+          if(fromAPI) title = (node.childNodes[1].childNodes[3] as Element).innerHTML;
+          else title = (node.childNodes[0].childNodes[1] as Element).innerHTML;
+          if(title != "[Deleted video]")
+            this.tracks.push(new Track((node as Element).id));
         }
       });
     this.generateOffsets();
   }
   // Setting the InnerHtml cause the the html to be reparsed. Use with caution as its expensive.
-  setInnerHtml(innerHtml: string) {
+  setInnerHtml(innerHtml: string, fromAPI: boolean) {
     this.innerHtml = innerHtml;
-    this.parseResponse(innerHtml);
+    this.parseResponse(innerHtml,fromAPI);
   }
   private generateOffsets() {
     this.tracks.forEach((track) => {
@@ -169,7 +189,7 @@ class PlaylistData {
       Number.isNaN(nRawIndex) || nRawIndex > this.tracks.length - 1
         ? this.tracks.findIndex((track) => track.id == vId)
         : nRawIndex;
-    if (index = -1) index =0;
+    if (index == -1) index = 0;
     this.trackIndex = index;
     // We need to set the offset anyway, since we don't call setOffset() directly from the player object.
     this.setOffset();
@@ -179,6 +199,7 @@ class PlaylistData {
   }
   // Already formated to be zero indexed (tracks.length -1)
   getTrackCount() {
+    if(this.tracks.length == 0) return 0;
     return this.tracks.length - 1;
   }
   toggleShuffle() {
@@ -192,6 +213,13 @@ class PlaylistData {
   }
   isCustomPlaylist() {
     return this.isCustom;
+  }
+  setPlayNextIndexOverwrite(index: number) {
+    if (index >= 0 && index < this.tracks.length) {
+      this.playNextIndexOverwrite = index;
+      this.trackIndex = index;
+      this.setOffset();
+    }
   }
 }
 class PlaylistManager {
@@ -261,7 +289,7 @@ class PlaylistManager {
       {
         on200: function (response: Record<string, any>) {
           playlist.innerHTML = response.playlistHtml;
-          playerData.setInnerHtml(response.playlistHtml);
+          playerData.setInnerHtml(response.playlistHtml, true);
           playerData.setPlayingIndex();
           context.toLocalStorage();
         },
@@ -283,9 +311,7 @@ class PlaylistManager {
       const plid = window.helpers.storage.get("lastPlaylistID");
       if (plid != "customPlaylist") return; // We only want to do this on modified playlists
       const playerData: PlaylistData =
-        window.helpers.storage.get("playlistPlayerData")[
-          plid
-        ];
+        window.helpers.storage.get("playlistPlayerData")[plid];
       if (playerData == undefined) return;
       this.hasPlaylist = true;
       this.plid = plid;
@@ -360,46 +386,66 @@ class PlaylistManager {
   addVideo(video_id: string) {
     video_id = video_id.split("%")[1];
     if (!this.hasPlaylist) {
-      this.plid = "customPlaylist";
-      this.playerData = this.readFromLocalStorage();
-      this.hasPlaylist = true;
-      this.createPlaylistNode(true);
+      return this.createPlaylistFrom(video_id);
     }
-    let track = new Track(video_id);
-    // Cant be null! Because if this is null, alot broke in invidious since there would a related video without and id.
-    track.FromDivElement(
-      document.getElementById("rv%" + video_id)! as HTMLDivElement
-    );
-    // Static string
-    let innerHTML = this.playerData.getInnerHTML();
     const queryParams = [
       "listCustom=" + this.plid,
       this.playerData.isCustomPlaylist()
         ? "indexCustom=" + this.playerData.getTrackCount()
         : "index=" + this.playerData.getTrackCount(),
     ];
-    if (innerHTML === undefined || innerHTML === null || innerHTML === "") {
-      innerHTML =
-        '<h3><a>Current Playlist</a></h3><div class="pure-menu pure-menu-scrollable playlist-restricted"><ol class="pure-menu-list"></ol></div><hr>';
-      let parser = new DOMParser();
-      let doc = parser.parseFromString(innerHTML, "text/html");
-      doc.body.childNodes[1].childNodes[0].appendChild(
-        track.toHtml(queryParams)[0]
-      );
-      this.playlistNode.innerHTML = doc.body.innerHTML;
-      this.playerData.setInnerHtml(doc.body.innerHTML);
-    } else {
-      let trackHtml = track.toHtml(queryParams)[0];
+    const track = this.trackFromID(video_id,false);
+    let trackHtml = track.toHtml(queryParams)[0];
+    // We need to do this since the html structure is ever so slighty different because of href thats missing on custom ones
+    try {
       this.playlistNode.childNodes[2].childNodes[1].appendChild(trackHtml);
-      this.playerData.setInnerHtml(this.playlistNode.innerHTML);
-      // If playNext is to be implemented, we need to return the index of the added track for later use.
-      this.playerData.addTrack(track, false);
+    } catch (error) {
+      this.playlistNode.childNodes[1].childNodes[0].appendChild(trackHtml);
     }
+    this.playerData.setInnerHtml(this.playlistNode.innerHTML, false);
+    // If playNext is to be implemented, we need to return the index of the added track for later use.
+    this.playerData.addTrack(track, false);
+
     this.playerData.setPlayingIndex();
     this.toLocalStorage();
   }
   hasAPlaylistLoaded() {
     return this.hasPlaylist;
+  }
+  createPlaylistFrom(video_id: string) {
+    this.plid = "customPlaylist";
+    this.playerData = this.readFromLocalStorage();
+    this.hasPlaylist = true;
+    this.createPlaylistNode(true);
+    const queryParams = [
+      "listCustom=" + this.plid,
+      this.playerData.isCustomPlaylist()
+        ? "indexCustom=" + this.playerData.getTrackCount()
+        : "index=" + this.playerData.getTrackCount(),
+    ];
+    const track = this.trackFromID(video_id, true);
+    const innerHTML =
+      '<h3><a>Current Playlist</a></h3><div class="pure-menu pure-menu-scrollable playlist-restricted"><ol class="pure-menu-list"></ol></div><hr>';
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(innerHTML, "text/html");
+    doc.body.childNodes[1].childNodes[0].appendChild(
+      track.toHtml(queryParams)[0]
+    );
+    this.playlistNode.innerHTML = doc.body.innerHTML;
+    this.playerData.setInnerHtml(doc.body.innerHTML, false);
+    this.playerData.setPlayNextIndexOverwrite(1);
+    this.toLocalStorage();
+  }
+  private trackFromID(video_id: string, fromVideData: boolean): Track {
+    let track = new Track(video_id);
+    if(fromVideData)
+      track.fromVideoData(video_data)
+    else
+    // Cant be null! Because if this is null, alot broke in invidious since there would a related video without and id.
+    track.FromDivElement(
+      document.getElementById("rv%" + video_id)! as HTMLDivElement
+    );
+    return track;
   }
   private createPlaylistNode(addControls: boolean) {
     if (addControls) {
@@ -490,15 +536,27 @@ addEventListener("load", (ev) => {
   // Overrides next video function, used to skip to next video.
   //@ts-ignore
   next_video = function () {
-    playlistManager.next();
+    if (playlistManager.hasAPlaylistLoaded()) playlistManager.next();
+    else{
+      playlistManager.createPlaylistFrom(video_data.id);
+      playlistManager.addVideo("rv%"+video_data.next_video);
+      playlistManager.next();
+    }
   };
   // Need to register it here too since continue_autoplay isnt called autmatically
   player.on("ended", () => {
-    playlistManager.next();
+    if (playlistManager.hasAPlaylistLoaded()) playlistManager.next();
+    else if (
+      video_data.params.autoplay ||
+      video_data.params.continue_autoplay
+    ) {
+      playlistManager.createPlaylistFrom(video_data.id);
+      playlistManager.addVideo("rv%"+video_data.next_video);
+    } else return;
   });
   // Hook to always load the custom playlist if one was created.
-  if (video_data.plid == undefined || video_data.plid == "")
-    playlistManager.tryToLoadCustomPlaylist();
+  //if (video_data.plid == undefined || video_data.plid == "")
+    //playlistManager.tryToLoadCustomPlaylist();
 });
 var playlistManager = new PlaylistManager(video_data);
 var shuffle_button = document.getElementById("shuffle");
