@@ -42,6 +42,11 @@ jobs:
             git diff
             exit 1
           fi
+      - name: Install npm/nodejs and build ts code
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+        run: npm i typescript && tsc -p ./frontend
 
       - name: Set up Docker Buildx
         id: buildx
