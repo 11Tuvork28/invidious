@@ -50,7 +50,7 @@ module Invidious::Routes::BeforeAll
       "frame-src 'self'  api.xamh.de",
       "frame-ancestors " + frame_ancestors,
     }.join("; ")
-    env.response.headers["Access-Control-Allow-Origin"] = "*"
+    env.response.headers["Access-Control-Allow-Origin"] = "invidio.xamh.de"
     env.response.headers["Referrer-Policy"] = "allow-origin"
 
     # Ask the chrom*-based browsers to disable FLoC
