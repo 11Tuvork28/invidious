@@ -52,7 +52,7 @@ module Invidious::Routes::BeforeAll
     }.join("; ")
     env.response.headers["Access-Control-Allow-Origin"] = "https://invidio.xamh.de"
     env.response.headers["Referrer-Policy"] = "allow-origin"
-    env.response.headers["Access-Control-Allow-Credentials"] = true
+    env.response.headers["Access-Control-Allow-Credentials"] = "true"
 
     # Ask the chrom*-based browsers to disable FLoC
     # See: https://blog.runcloud.io/google-floc/
