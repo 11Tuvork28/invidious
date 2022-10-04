@@ -109,7 +109,7 @@ class PlaylistData {
       else {
         let i = 0;
         // This reads weird but essentially its false by default so we check against it.
-        while (this.tracks[trackIndex].played && i > this.tracks.length) {
+        while (this.tracks[trackIndex].played && !(i > this.tracks.length)) {
           trackIndex = Math.floor(Math.random() * this.tracks.length - 1);
           i++;
         }
