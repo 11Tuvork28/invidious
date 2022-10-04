@@ -43,11 +43,11 @@ module Invidious::Routes::BeforeAll
       "style-src 'self' static.xamh.de 'unsafe-inline'",
       "img-src 'self' static.xamh.de data:",
       "font-src 'self' static.xamh.de data:",
-      "connect-src 'self'",
-      "manifest-src 'self'",
-      "media-src 'self' static.xamh.de blob:" + extra_media_csp,
+      "connect-src 'self'  api.xamh.de",
+      "manifest-src 'self'  api.xamh.de",
+      "media-src 'self' static.xamh.de api.xamh.de blob:" + extra_media_csp,
       "child-src 'self' blob:",
-      "frame-src 'self'",
+      "frame-src 'self'  api.xamh.de",
       "frame-ancestors " + frame_ancestors,
     }.join("; ")
     env.response.headers["Access-Control-Allow-Origin"] = "*.xamh.de"
