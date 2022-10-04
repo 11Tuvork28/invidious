@@ -12,7 +12,8 @@ var notifications_mock = { close: function () { } };
 function get_subscriptions() {
     helpers.xhr('GET', 'https://api.xamh.de/api/v1/auth/subscriptions?fields=authorId', {
         retries: 5,
-        entity_name: 'subscriptions'
+        entity_name: 'subscriptions',
+        withCredentials: true
     }, {
         on200: create_notification_stream
     });
