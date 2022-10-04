@@ -293,7 +293,7 @@ class PlaylistManager {
       {
         on200: function (response: Record<string, any>) {
           playlist.innerHTML = response.playlistHtml;
-          playerData.setInnerHtml(response.playlistHtml, true);
+          playerData.setInnerHtml(response.playlistHtml);
           playerData.setPlayingIndex();
           context.toLocalStorage();
         },
@@ -406,7 +406,7 @@ class PlaylistManager {
     } catch (error) {
       this.playlistNode.childNodes[1].childNodes[0].appendChild(trackHtml);
     }
-    this.playerData.setInnerHtml(this.playlistNode.innerHTML, false);
+    this.playerData.setInnerHtml(this.playlistNode.innerHTML);
     this.playerData.setPlayingIndex();
     this.toLocalStorage();
   }
@@ -433,7 +433,7 @@ class PlaylistManager {
       track.toHtml(queryParams)[0]
     );
     this.playlistNode.innerHTML = doc.body.innerHTML;
-    this.playerData.setInnerHtml(doc.body.innerHTML, false);
+    this.playerData.setInnerHtml(doc.body.innerHTML);
     this.playerData.setPlayNextIndexOverwrite(1);
     this.toLocalStorage();
   }
