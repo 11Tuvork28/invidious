@@ -4,11 +4,11 @@ var video_data = JSON.parse(document.getElementById('video_data').textContent);
 function get_playlist(plid) {
     var plid_url;
     if (plid.startsWith('RD')) {
-        plid_url = '/api/v1/mixes/' + plid +
+        plid_url = 'https://api.xamh.de/api/v1/mixes/' + plid +
             '?continuation=' + video_data.id +
             '&format=html&hl=' + video_data.preferences.locale;
     } else {
-        plid_url = '/api/v1/playlists/' + plid +
+        plid_url = 'https://api.xamh.de/api/v1/playlists/' + plid +
             '?index=' + video_data.index +
             '&continuation' + video_data.id +
             '&format=html&hl=' + video_data.preferences.locale;

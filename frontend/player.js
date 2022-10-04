@@ -378,7 +378,7 @@ if (!video_data.params.listen && video_data.params.quality === 'dash') {
 }
 
 player.vttThumbnails({
-    src: '/api/v1/storyboards/' + video_data.id + '?height=90',
+    src: 'https://api.xamh.de/api/v1/storyboards/' + video_data.id + '?height=90',
     showTimestamp: true
 });
 
@@ -404,7 +404,7 @@ if (!video_data.params.listen && video_data.params.annotations) {
             }
         });
 
-        helpers.xhr('GET', '/api/v1/annotations/' + video_data.id, {
+        helpers.xhr('GET', 'https://api.xamh.de/api/v1/annotations/' + video_data.id, {
             responseType: 'text',
             timeout: 60000
         }, {
