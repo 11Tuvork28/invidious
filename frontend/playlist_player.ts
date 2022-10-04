@@ -129,7 +129,7 @@ class PlaylistData {
     else this.tracks.splice(0, 0, track);
     this.addOffset(track);
   }
-  private parseResponse(playlistHtml: string,fromAPI: boolean) {
+  private parseResponse(playlistHtml: string) {
     this.tracks = []; // Need to reset it here because else we cause duplicates
     var parser = new DOMParser();
     var doc = parser.parseFromString(playlistHtml, "text/html");
@@ -141,8 +141,12 @@ class PlaylistData {
           (node as Element).localName == "li" &&
           (node as Element).id != ""
         ) {
-          if(fromAPI) title = (node.childNodes[1].childNodes[3] as Element).innerHTML;
-          else title = (node.childNodes[0].childNodes[1] as Element).innerHTML;
+          try{
+            title = (node.childNodes[1].childNodes[3] as Element).innerHTML;
+          }
+          catch(err){
+            title = (node.childNodes[0].childNodes[1] as Element).innerHTML;
+          } 
           if(title != "[Deleted video]")
             this.tracks.push(new Track((node as Element).id));
         }
@@ -150,9 +154,9 @@ class PlaylistData {
     this.generateOffsets();
   }
   // Setting the InnerHtml cause the the html to be reparsed. Use with caution as its expensive.
-  setInnerHtml(innerHtml: string, fromAPI: boolean) {
+  setInnerHtml(innerHtml: string) {
     this.innerHtml = innerHtml;
-    this.parseResponse(innerHtml,fromAPI);
+    this.parseResponse(innerHtml);
   }
   private generateOffsets() {
     this.tracks.forEach((track) => {
@@ -394,7 +398,7 @@ class PlaylistManager {
         ? "indexCustom=" + this.playerData.getTrackCount()
         : "index=" + this.playerData.getTrackCount(),
     ];
-    const track = this.trackFromID(video_id,false);
+    const track = this.trackFromID(video_id);
     let trackHtml = track.toHtml(queryParams)[0];
     // We need to do this since the html structure is ever so slighty different because of href thats missing on custom ones
     try {
@@ -420,7 +424,7 @@ class PlaylistManager {
         ? "indexCustom=" + this.playerData.getTrackCount()
         : "index=" + this.playerData.getTrackCount(),
     ];
-    const track = this.trackFromID(video_id, true);
+    const track = this.trackFromID(video_id);
     const innerHTML =
       '<h3><a>Current Playlist</a></h3><div class="pure-menu pure-menu-scrollable playlist-restricted"><ol class="pure-menu-list"></ol></div><hr>';
     let parser = new DOMParser();
