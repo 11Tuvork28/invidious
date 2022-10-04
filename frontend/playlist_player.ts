@@ -398,7 +398,7 @@ class PlaylistManager {
         ? "indexCustom=" + this.playerData.getTrackCount()
         : "index=" + this.playerData.getTrackCount(),
     ];
-    const track = this.trackFromID(video_id);
+    const track = this.trackFromID(video_id, false);
     let trackHtml = track.toHtml(queryParams)[0];
     // We need to do this since the html structure is ever so slighty different because of href thats missing on custom ones
     try {
@@ -424,7 +424,7 @@ class PlaylistManager {
         ? "indexCustom=" + this.playerData.getTrackCount()
         : "index=" + this.playerData.getTrackCount(),
     ];
-    const track = this.trackFromID(video_id);
+    const track = this.trackFromID(video_id, true);
     const innerHTML =
       '<h3><a>Current Playlist</a></h3><div class="pure-menu pure-menu-scrollable playlist-restricted"><ol class="pure-menu-list"></ol></div><hr>';
     let parser = new DOMParser();
