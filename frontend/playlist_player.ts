@@ -105,14 +105,11 @@ class PlaylistData {
     this.playedTrackIndecies.push(this.trackIndex);
     this.tracks[this.trackIndex].played = true;
     if (this.shuffle) {
-      if (this.tracks.length - 1 == this.trackIndex) return undefined;
-      else {
         let i = 0;
         // This reads weird but essentially its false by default so we check against it.
         while (this.tracks[trackIndex].played && !(i > this.tracks.length)) {
           trackIndex = Math.floor(Math.random() * this.tracks.length - 1);
           i++;
-        }
       }
     } else if (this.loop_all && this.trackIndex == this.tracks.length - 1) {
       trackIndex = 0;
