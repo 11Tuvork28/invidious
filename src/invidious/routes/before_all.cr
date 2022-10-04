@@ -54,7 +54,6 @@ module Invidious::Routes::BeforeAll
     env.response.headers["Referrer-Policy"] = "allow-origin"
     env.response.headers["Access-Control-Allow-Credentials"] = true
 
-
     # Ask the chrom*-based browsers to disable FLoC
     # See: https://blog.runcloud.io/google-floc/
     env.response.headers["Permissions-Policy"] = "interest-cohort=()"
