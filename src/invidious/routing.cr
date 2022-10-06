@@ -16,6 +16,7 @@ module Invidious::Routing
   {% end %}
 
   def register_all
+    self.register_image_routes
     self.register_api_v1_routes
     self.register_api_manifest_routes
     self.register_video_playback_routes
@@ -46,6 +47,20 @@ module Invidious::Routing
     options "/videoplayback/*", Routes::VideoPlayback, :options_video_playback
 
     get "/latest_version", Routes::VideoPlayback, :latest_version
+  end
+
+  # -------------------
+  #  API routes
+  # -------------------
+
+
+  def register_image_routes
+    get "/ggpht/*", Routes::Images, :ggpht
+    options "/sb/:authority/:id/:storyboard/:index", Routes::Images, :options_storyboard
+    get "/sb/:authority/:id/:storyboard/:index", Routes::Images, :get_storyboard
+    get "/s_p/:id/:name", Routes::Images, :s_p_image
+    get "/yts/img/:name", Routes::Images, :yts_image
+    get "/vi/:id/:name", Routes::Images, :thumbnails
   end
 
   # -------------------
