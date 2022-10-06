@@ -4,7 +4,7 @@
 
 
 <% content_for "header" do %>
-<meta name="thumbnail" content="https://static.xamh.de<%= thumbnail %>">
+<meta name="thumbnail" content="<%= thumbnail %>">
 <meta name="description" content="<%= HTML.escape(video.short_description) %>">
 <meta name="keywords" content="<%= video.keywords.join(",") %>">
 <meta property="og:site_name" content="Invidious">
