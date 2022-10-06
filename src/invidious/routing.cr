@@ -53,7 +53,6 @@ module Invidious::Routing
   #  API routes
   # -------------------
 
-
   def register_image_routes
     get "/ggpht/*", Routes::Images, :ggpht
     options "/sb/:authority/:id/:storyboard/:index", Routes::Images, :options_storyboard
