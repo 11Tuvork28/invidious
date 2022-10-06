@@ -73,7 +73,8 @@ window.helpers = window.helpers || {
             xhr.responseType = options.responseType;
         if (options.timeout)
             xhr.timeout = options.timeout;
-
+        if (options.withCredentials)
+            xhr.withCredentials = true;
         if (method === 'POST')
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
