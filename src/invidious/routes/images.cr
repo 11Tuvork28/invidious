@@ -74,7 +74,7 @@ module Invidious::Routes::Images
     storyboard = env.params.url["storyboard"]
     index = env.params.url["index"]
 
-    url = "sb/#{id}/#{storyboard}/#{index}?#{env.params.query}"
+    url = "/sb/#{id}/#{storyboard}/#{index}?#{env.params.query}"
 
     headers = HTTP::Headers.new
 
