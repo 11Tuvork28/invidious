@@ -261,7 +261,7 @@ module Invidious::Routes::Images
       end
     end
 
-    url = "https://static.xamh.de/vi/#{id}/#{name}"
+    url = "/vi/#{id}/#{name}"
 
     REQUEST_HEADERS_WHITELIST.each do |header|
       if env.request.headers[header]?
