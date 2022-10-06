@@ -237,7 +237,7 @@ module Invidious::Routes::Images
 
     if name == "maxres.jpg"
       build_thumbnails(id).each do |thumb|
-        thumbnail_resource_path = "/vi/#{id}/#{thumb[:url]}.jpg"
+        thumbnail_resource_path = "https://static.xamh.de/vi/#{id}/#{thumb[:url]}.jpg"
         # Logic here is short enough that manually typing them out should be fine.
         {% unless flag?(:disable_quic) %}
           if CONFIG.use_quic
@@ -261,7 +261,7 @@ module Invidious::Routes::Images
       end
     end
 
-    url = "/vi/#{id}/#{name}"
+    url = "https://static.xamh.de/vi/#{id}/#{name}"
 
     REQUEST_HEADERS_WHITELIST.each do |header|
       if env.request.headers[header]?

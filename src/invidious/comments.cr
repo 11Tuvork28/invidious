@@ -316,7 +316,7 @@ def template_youtube_comments(comments, locale, thin_mode, is_replies = false)
       end
 
       if !thin_mode
-        author_thumbnail = "/ggpht#{URI.parse(child["authorThumbnails"][-1]["url"].as_s).request_target}"
+        author_thumbnail = "https://static.xamh.de/ggpht#{URI.parse(child["authorThumbnails"][-1]["url"].as_s).request_target}"
       else
         author_thumbnail = ""
       end
@@ -350,7 +350,7 @@ def template_youtube_comments(comments, locale, thin_mode, is_replies = false)
           html << <<-END_HTML
           <div class="pure-g">
             <div class="pure-u-1 pure-u-md-1-2">
-              <img loading="lazy" style="width:100%" src="/ggpht#{URI.parse(attachment["url"].as_s).request_target}">
+              <img loading="lazy" style="width:100%" src="https://static.xamh.de/ggpht#{URI.parse(attachment["url"].as_s).request_target}">
             </div>
           </div>
           END_HTML
@@ -403,7 +403,7 @@ def template_youtube_comments(comments, locale, thin_mode, is_replies = false)
 
       if child["creatorHeart"]?
         if !thin_mode
-          creator_thumbnail = "/ggpht#{URI.parse(child["creatorHeart"]["creatorThumbnail"].as_s).request_target}"
+          creator_thumbnail = "https://static.xamh.de/ggpht#{URI.parse(child["creatorHeart"]["creatorThumbnail"].as_s).request_target}"
         else
           creator_thumbnail = ""
         end

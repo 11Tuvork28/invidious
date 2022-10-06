@@ -56,8 +56,8 @@ function create_notification_stream(subscriptions) {
 
             var system_notification = new Notification(notification_text, {
                 body: notification.title,
-                icon: '/ggpht' + new URL(notification.authorThumbnails[2].url).pathname,
-                img: '/ggpht' + new URL(notification.authorThumbnails[4].url).pathname
+                icon: 'https://static.xamh.de/ggpht' + new URL(notification.authorThumbnails[2].url).pathname,
+                img: 'https://static.xamh.de/ggpht' + new URL(notification.authorThumbnails[4].url).pathname
             });
 
             system_notification.onclick = function (e) {

@@ -191,7 +191,7 @@ module Invidious::Routes::Embed
 
     aspect_ratio = nil
 
-    thumbnail = "/vi/#{video.id}/maxres.jpg"
+    thumbnail = "https://static.xamh.de/vi/#{video.id}/maxres.jpg"
 
     if params.raw
       url = fmt_stream[0]["url"].as_s

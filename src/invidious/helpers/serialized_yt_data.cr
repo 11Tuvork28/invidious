@@ -37,7 +37,7 @@ struct SearchVideo
       xml.element("content", type: "xhtml") do
         xml.element("div", xmlns: "http://www.w3.org/1999/xhtml") do
           xml.element("a", href: "#{HOST_URL}/watch?#{query_params}") do
-            xml.element("img", src: "#{HOST_URL}/vi/#{self.id}/mqdefault.jpg")
+            xml.element("img", src: "https://static.xamh.de/vi/#{self.id}/mqdefault.jpg")
           end
 
           xml.element("p", style: "word-break:break-word;white-space:pre-wrap") { xml.text html_to_content(self.description_html) }
@@ -48,7 +48,7 @@ struct SearchVideo
 
       xml.element("media:group") do
         xml.element("media:title") { xml.text self.title }
-        xml.element("media:thumbnail", url: "#{HOST_URL}/vi/#{self.id}/mqdefault.jpg",
+        xml.element("media:thumbnail", url: "https://static.xamh.de/vi/#{self.id}/mqdefault.jpg",
           width: "320", height: "180")
         xml.element("media:description") { xml.text html_to_content(self.description_html) }
       end

@@ -166,7 +166,7 @@ module Invidious::Routes::Watch
 
     aspect_ratio = "16:9"
 
-    thumbnail = "/vi/#{video.id}/maxres.jpg"
+    thumbnail = "https://static.xamh.de/vi/#{video.id}/maxres.jpg"
 
     if params.raw
       if params.listen

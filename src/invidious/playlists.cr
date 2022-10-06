@@ -27,7 +27,7 @@ struct PlaylistVideo
       xml.element("content", type: "xhtml") do
         xml.element("div", xmlns: "http://www.w3.org/1999/xhtml") do
           xml.element("a", href: "#{HOST_URL}/watch?v=#{self.id}") do
-            xml.element("img", src: "#{HOST_URL}/vi/#{self.id}/mqdefault.jpg")
+            xml.element("img", src: "https://static.xamh.de/vi/#{self.id}/mqdefault.jpg")
           end
         end
       end
@@ -36,7 +36,7 @@ struct PlaylistVideo
 
       xml.element("media:group") do
         xml.element("media:title") { xml.text self.title }
-        xml.element("media:thumbnail", url: "#{HOST_URL}/vi/#{self.id}/mqdefault.jpg",
+        xml.element("media:thumbnail", url: "https://static.xamh.de/vi/#{self.id}/mqdefault.jpg",
           width: "320", height: "180")
       end
     end
@@ -225,7 +225,7 @@ struct InvidiousPlaylist
   def thumbnail
     # TODO: Get playlist thumbnail from playlist data rather than first video
     @thumbnail_id ||= Invidious::Database::PlaylistVideos.select_one_id(self.id, self.index) || "-----------"
-    "/vi/#{@thumbnail_id}/mqdefault.jpg"
+    "https://static.xamh.de/vi/#{@thumbnail_id}/mqdefault.jpg"
   end
 
   def author_thumbnail
@@ -513,7 +513,7 @@ def template_playlist(playlist)
       <li class="pure-menu-item" id="#{video["videoId"]}">
         <a href="/watch?v=#{video["videoId"]}&list=#{playlist["playlistId"]}&index=#{video["index"]}">
           <div class="thumbnail">
-              <img loading="lazy" class="thumbnail" src="/vi/#{video["videoId"]}/mqdefault.jpg">
+              <img loading="lazy" class="thumbnail" src="https://static.xamh.de/vi/#{video["videoId"]}/mqdefault.jpg">
               <p class="length">#{recode_length_seconds(video["lengthSeconds"].as_i)}</p>
           </div>
           <p style="width:100%">#{video["title"]}</p>

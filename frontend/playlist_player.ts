@@ -33,7 +33,7 @@ class Track {
         this.id +
         "&" +
         urlParams.join("&") +
-        '"><div class="thumbnail"><img loading="lazy" class="thumbnail" src="/vi/' +
+        '"><div class="thumbnail"><img loading="lazy" class="thumbnail" src="https://static.xamh.de/vi/' +
         this.id +
         '/mqdefault.jpg"><p class="length">' +
         this.duration +
