@@ -13,7 +13,7 @@ function get_subscriptions() {
     helpers.xhr('GET', 'https://api.xamh.de/api/v1/auth/subscriptions?fields=authorId', {
         retries: 5,
         entity_name: 'subscriptions',
-        withCredentials: true
+        withCredentials: false
     }, {
         on200: create_notification_stream
     });
@@ -117,6 +117,7 @@ addEventListener('storage', function (e) {
 });
 
 addEventListener('load', function () {
+    return;
     var notification_count_el = document.getElementById('notification_count');
     var notification_count = notification_count_el ? parseInt(notification_count_el.textContent) : 0;
     helpers.storage.set(STORAGE_KEY_NOTIF_COUNT, notification_count);
