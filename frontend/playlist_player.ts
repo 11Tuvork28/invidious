@@ -573,3 +573,81 @@ if (loop_button) {
     playlistManager.toggleLoop();
   });
 }
+
+// Control the flow of mediaSession metadata
+function updateMediaSession() {
+  // Only refresh if the video is loaded and playing
+  //@ts-ignore
+  if (!player || player.paused()) return navigator.mediaSession.playbackState = "paused";
+
+  if ("mediaSession" in navigator) {
+    // Parse video data
+    const cTrack = new Track(video_data.id);
+    cTrack.fromVideoData(video_data);
+
+    // Set content metadata
+    //@ts-ignore
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: player_data.title.trim(),
+      // TODO: in the future, extract the actual 'artist' from music videos and use this, same for the `album` property!
+      //@ts-ignore
+      artist: cTrack.channelName.trim(),
+      artwork: [
+        // TODO: we should have multiple sized thumbnails for the Media display to choose from, this is not optimised
+        // ... and will use excessive bandwidth on Mobile, where smaller images are suitable
+
+        // Chrome.com docs: Notification artwork size in Chrome for Android is 512x512. For low-end devices, it is 256x256.
+        { src: player_data.thumbnail, sizes: '1280x720', type: 'image/jpg' }
+      ]
+    });
+
+    // Update playback state
+    //@ts-ignore
+    if ("setPositionState" in navigator.mediaSession) {
+      //@ts-ignore
+      navigator.mediaSession.playbackState = "playing";
+      //@ts-ignore
+      navigator.mediaSession.setPositionState({
+        duration: player.duration() || 0,
+        playbackRate: player.playbackRate() || 1,
+        position: player.currentTime() || 0,
+      });
+    }
+  }
+}
+
+// Hook mediaSession controls into Invidious
+if ("mediaSession" in navigator) {
+  // Previous track
+  //@ts-ignore
+  navigator.mediaSession.setActionHandler("previoustrack", () => {
+    playlistManager.prev.call(window.playlistManager);
+    updateMediaSession();
+  });
+
+  // Next track
+  //@ts-ignore
+  navigator.mediaSession.setActionHandler("nexttrack", () => {
+    next_video();
+    updateMediaSession();
+  });
+
+  // Skip forwards
+  //@ts-ignore
+  navigator.mediaSession.setActionHandler('seekforward', () => {
+    skip_seconds(5 * player.playbackRate());
+    updateMediaSession();
+  });
+
+  // Skip backwards
+  //@ts-ignore
+  navigator.mediaSession.setActionHandler('seekbackward', () => {
+    skip_seconds(-5 * player.playbackRate());
+    updateMediaSession();
+  });
+
+  // Note: we allow videojs to handle play/pause/stop action handles
+
+  // Attempt to refresh media data every second
+  setInterval(updateMediaSession, 1000);
+}
