@@ -23,9 +23,9 @@ module Invidious::Routes::BeforeAll
     # Allow media resources to be loaded from google servers
     # TODO: check if *.youtube.com can be removed
     if CONFIG.disabled?("local") || !preferences.local
-      extra_media_csp = " https://*.googlevideo.com:443 https://*.youtube.com:443"
+      extra_media_csp = " https://*.googlevideo.com:443 https://*.youtube.com:443 https://*.xamh.de:443"
     else
-      extra_media_csp = ""
+      extra_media_csp = " https://*.xamh.de:443"
     end
 
     # Only allow the pages at /embed/* to be embedded
@@ -50,9 +50,8 @@ module Invidious::Routes::BeforeAll
       "frame-src 'self'",
       "frame-ancestors " + frame_ancestors,
     }.join("; ")
-    env.response.headers["Access-Control-Allow-Origin"] = "https://invidio.xamh.de"
+    env.response.headers["Access-Control-Allow-Origin"] = "*"
     env.response.headers["Referrer-Policy"] = "allow-origin"
-    env.response.headers["Access-Control-Allow-Credentials"] = "true"
 
     # Ask the chrom*-based browsers to disable FLoC
     # See: https://blog.runcloud.io/google-floc/
