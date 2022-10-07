@@ -4,6 +4,7 @@ class Track {
   public id: string = "";
   private channelName: string = "";
   private duration: string = "";
+  private href: string = ""; // URL params
 
   constructor(id: string) {
     this.id = id;
@@ -20,10 +21,14 @@ class Track {
     ).innerText;
     return this;
   }
-  fromVideoData(video_data: Record<string, any>){
-    this.title = document.getElementById("contents")!.getElementsByTagName("h1")[0].innerText;
-    this.duration = (video_data.length_seconds / 60).toPrecision(3).replace(".", ":");
-    this.channelName = document.getElementById("channel-name")!.innerText
+  fromVideoData(video_data: Record<string, any>) {
+    this.title = document
+      .getElementById("contents")!
+      .getElementsByTagName("h1")[0].innerText;
+    this.duration = (video_data.length_seconds / 60)
+      .toPrecision(3)
+      .replace(".", ":");
+    this.channelName = document.getElementById("channel-name")!.innerText;
   }
   toHtml(urlParams: Array<string>): NodeListOf<ChildNode> {
     return new DOMParser().parseFromString(
@@ -45,6 +50,23 @@ class Track {
       "text/html"
     ).body.childNodes;
   }
+  toHtmlString(): string {
+    return (
+      '<li class="pure-menu-item" id="' +
+      this.id +
+      '"><a href="/watch?v=' +
+      this.id +
+      '"><div class="thumbnail"><img loading="lazy" class="thumbnail" src="https://static.xamh.de/vi/' +
+      this.id +
+      '/mqdefault.jpg"><p class="length">' +
+      this.duration +
+      '</p></div><p style="width:100%">' +
+      this.title +
+      '</p><p><b style="width:100%">' +
+      this.channelName +
+      "</b></p></a></li>"
+    );
+  }
 }
 class PlaylistData {
   private loop_all: boolean;
@@ -58,6 +80,7 @@ class PlaylistData {
   private isCustom: boolean;
   private playedTrackIndecies: Array<number>;
   private playNextIndexOverwrite: number | undefined;
+  private playlistNode: PlaylistNode;
 
   constructor() {
     this.loop_all = false;
@@ -105,11 +128,11 @@ class PlaylistData {
     this.playedTrackIndecies.push(this.trackIndex);
     this.tracks[this.trackIndex].played = true;
     if (this.shuffle) {
-        let i = 0;
-        // This reads weird but essentially its false by default so we check against it.
-        while (this.tracks[trackIndex].played && !(i > this.tracks.length)) {
-          trackIndex = Math.floor(Math.random() * this.tracks.length - 1);
-          i++;
+      let i = 0;
+      // This reads weird but essentially its false by default so we check against it.
+      while (this.tracks[trackIndex].played && !(i > this.tracks.length)) {
+        trackIndex = Math.floor(Math.random() * this.tracks.length - 1);
+        i++;
       }
     } else if (this.loop_all && this.trackIndex == this.tracks.length - 1) {
       trackIndex = 0;
@@ -126,53 +149,11 @@ class PlaylistData {
     else this.tracks.splice(0, 0, track);
     this.addOffset(track);
   }
-  private parseResponse(playlistHtml: string) {
-    this.tracks = []; // Need to reset it here because else we cause duplicates
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(playlistHtml, "text/html");
-    doc
-      .getElementsByClassName("pure-menu-list")[0]
-      .childNodes.forEach((node) => {
-        let title: string = "";
-        if (
-          (node as Element).localName == "li" &&
-          (node as Element).id != ""
-        ) {
-          try{
-            title = (node.childNodes[1].childNodes[3] as Element).innerHTML;
-          }
-          catch(err){
-            title = (node.childNodes[0].childNodes[1] as Element).innerHTML;
-          } 
-          if(title != "[Deleted video]")
-            this.tracks.push(new Track((node as Element).id));
-        }
-      });
-    this.generateOffsets();
-  }
+
   // Setting the InnerHtml cause the the html to be reparsed. Use with caution as its expensive.
   setInnerHtml(innerHtml: string) {
     this.innerHtml = innerHtml;
     this.parseResponse(innerHtml);
-  }
-  private generateOffsets() {
-    this.tracks.forEach((track) => {
-      this.offsets[track.id] = document.getElementById(track.id)!.offsetTop;
-    });
-  }
-  private addOffset(track: Track) {
-    this.offsets[track.id] = document.getElementById(track.id)!.offsetTop;
-  }
-  private setOffset() {
-    let offset;
-    let offsetTrackId = this.getCurrentTrack();
-    let expectedTrackId = new URLSearchParams(window.location.search).get("v")!;
-    if (offsetTrackId.id == expectedTrackId)
-      offset = this.offsets[offsetTrackId.id];
-    else offset = this.offsets[expectedTrackId];
-    document.getElementsByClassName(
-      "pure-menu pure-menu-scrollable playlist-restricted"
-    )[0].scrollTop = offset;
   }
   wasLoaded(): boolean {
     return this.wasLoadedBefore;
@@ -200,7 +181,7 @@ class PlaylistData {
   }
   // Already formated to be zero indexed (tracks.length -1)
   getTrackCount() {
-    if(this.tracks.length == 0) return 0;
+    if (this.tracks.length == 0) return 0;
     return this.tracks.length - 1;
   }
   toggleShuffle() {
@@ -222,13 +203,175 @@ class PlaylistData {
       this.setOffset();
     }
   }
+  reverse() {
+    this.tracks.reverse();
+    this.playlistNode.reverse();
+  }
+}
+class PlaylistNode {
+  private element!: HTMLOListElement;
+  private templatePlaylistString: string =
+    '<div><label for="loop">Loop Playlist</label><input name="loop" id="loop" type="checkbox"><label for="shuffle">Shuffle Playlist</label><input name="shuffle" id="shuffle" type="checkbox"><div id="playlist" class="h-box"><h3><a href="/feed/playlists">Current Playlist</a></h3><div class="pure-menu pure-menu-scrollable playlist-restricted"><ol class="pure-menu-list"></ol></div><hr></div></div>';
+  private offsets: Record<string, number> = {};
+  constructor() {
+    this.getOrCreateDivElement();
+  }
+  /**
+   * !!!!NOT IMPLEMENTED!!!! Sorts the HTML nodes NOT the tracks.
+   * @param desc Wether to sort Descading, if false than Ascading is used.
+   */
+  sort(desc: boolean = false) {
+    // TODO IMPLEMENT: MUST SORT BOTH TRACKS ARRAY AND HTML
+  }
+  /**
+   * Reverses the HTML nodes NOT the tracks!
+   */
+  reverse() {
+    for (let i = 0; i < this.element.childNodes.length - 1; i++) {
+      this.element.insertBefore(
+        this.element.childNodes[i],
+        this.element.firstChild
+      );
+    }
+  }
+  /**
+   * Adds/inserts a track at the given position and adds the offset to the offest map.
+   * @param index Where to insert, variants are: "beforebegin" | "afterbegin" | "beforeend" | "afterend"
+   * @param track Track to insert
+   * @returns True if Successful. False if something failed.
+   */
+  insertAt(index: InsertPosition, track: Track): boolean {
+    try {
+      this.element.insertAdjacentHTML(index, track.toHtmlString());
+      this.addOffset(track);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+  /**
+   * Gets the offset for the given track.
+   * @param offsetTrackId The track you want the offset for
+   * @returns The offset or 0 if the id wasn't in the map
+   */
+  getOffset(offsetTrackId: string): number {
+    try {
+      return this.offsets[offsetTrackId];
+    } catch {
+      return 0
+    }
+  }
+  /**
+   * Sets the offset of a given track ID, it compares it to the current video ID 
+   * if they don't match the video ID's offset is used.
+   * If no given offset is useable, 0 is taken as the offset.
+   * @param offsetTrackId Current track ID
+   */
+  setOffsetToGivenTrack(offsetTrackId: string) {
+    let offset;
+    try {      
+      let expectedTrackId = new URLSearchParams(window.location.search).get("v")!;
+      if (offsetTrackId == expectedTrackId) offset = this.offsets[offsetTrackId];
+      else offset = this.offsets[expectedTrackId];
+    } catch (error) {
+      offset = 0;
+    }
+    this.element.parentElement!.scrollTop = offset;
+  }
+  /**
+   * Sets Innerhtml while parsesing tracks from it and generating offsets.
+   * @param innerHTML The string returned by the invidious api.
+   * @returns Array<Track> if Successful. undefiened if something failed.
+   */
+  setINNERHTML(innerHTML: string): Array<Track> | boolean{
+    this.element.innerHTML = innerHTML;
+    try{
+      return this.parseResponse(innerHTML);
+    }catch{
+      return false
+    }
+  }
+  /** 
+   * Either takes the element by id 'playlist' or creates it and inserts it into DOM.
+   * This is called by the ctor of this class
+   * @function private 
+   */
+  private getOrCreateDivElement() {
+    const _element = document.getElementById("playlist");
+    // IF null we wanna add controls
+    if (_element == null) {
+      // Shouldn't be null
+      const div: HTMLElement = document.getElementById("related-videos")!;
+      const playlistDiv = new DOMParser().parseFromString(
+        this.templatePlaylistString,
+        "text/html"
+      );
+      div.insertBefore(
+        playlistDiv.body.childNodes[0],
+        div.childNodes[0].nextSibling
+      );
+      // Can't be null Note that we already have a title and ordered list
+      this.element = document
+        .getElementById("playlist")!
+        .getElementsByClassName("pure-menu-list")[0] as HTMLOListElement;
+    } else {
+      this.element = _element.getElementsByClassName(
+        "pure-menu-list"
+      )[0] as HTMLOListElement;
+    }
+  }
+  /**
+   * Adds offset for a given track, after it was inserted into the DOM.
+   * @function private 
+   * @param track The track to add the offset for.
+   */
+  private addOffset(track: Track) {
+    this.offsets[track.id] = document.getElementById(track.id)!.offsetTop;
+  }
+  /**
+   * Generates the offsets for all tracks in the playlist DIV
+   * @function private 
+   */
+  private generateOffsets() {
+    for (let i = 1; i < this.element.childNodes.length - 1; i += 2) {
+      let element = this.element.childNodes[i];
+      this.offsets[(element as Element).id] = document.getElementById(
+        (element as Element).id
+      )!.offsetTop;
+    }
+  }
+  /**
+   * Parses tracks out of the given HTML and generates offsets for them
+   * @function private 
+   * @param playlistHtml The HTML returned by the invidious API.
+   * @returns Array<Track>
+   */
+  private parseResponse(playlistHtml: string): Array<Track> {
+    let tracks: Array<Track> = [];
+    var doc = new DOMParser().parseFromString(playlistHtml, "text/html");
+    doc
+      .getElementsByClassName("pure-menu-list")[0]
+      .childNodes.forEach((node) => {
+        let _node = node as Element;
+        let title = "";
+        if (_node.localName == "li" && _node.id != "") {
+          try {
+            title = (node.childNodes[1].childNodes[3] as Element).innerHTML;
+          } catch (err) {
+            title = (node.childNodes[0].childNodes[1] as Element).innerHTML;
+          }
+          if (title != "[Deleted video]") tracks.push(new Track(_node.id));
+        }
+      });
+    this.generateOffsets();
+    return tracks;
+  }
 }
 class PlaylistManager {
   private videoData: Record<string, any>;
   private plid: string;
   private hasPlaylist: boolean;
   private playerData: PlaylistData;
-  private playlistNode!: HTMLElement;
 
   constructor(video_data: Record<string, any>) {
     this.videoData = video_data;
@@ -239,12 +382,10 @@ class PlaylistManager {
     this.hasPlaylist = true;
     if (plid === null && plidCustom != null) {
       document.getElementById("autoplay-controls")!.style.display = "none";
-      this.createPlaylistNode(true);
       this.plid = plidCustom;
       this.playerData = this.readFromLocalStorage();
       this.loadPlaylist();
     } else if (plidCustom === null && plid != null) {
-      this.createPlaylistNode(false);
       this.plid = plid;
       this.playerData = this.readFromLocalStorage();
     } else {
@@ -255,8 +396,6 @@ class PlaylistManager {
   }
   loadPlaylist() {
     if (this.playerData.wasLoaded()) {
-      // IF the playlist was loaded once before this IT must have INNERHTML.
-      this.playlistNode.innerHTML = this.playerData.getInnerHTML()!;
       this.playerData.setPlayingIndex();
       this.toLocalStorage();
       return;
@@ -281,7 +420,6 @@ class PlaylistManager {
         this.videoData.preferences.locale;
     }
     var playerData = this.playerData;
-    var playlist = this.playlistNode;
     var context = this;
     window.helpers.xhr(
       "GET",
@@ -289,21 +427,15 @@ class PlaylistManager {
       { retries: 5, entity_name: "playlist" },
       {
         on200: function (response: Record<string, any>) {
-          playlist.innerHTML = response.playlistHtml;
           playerData.setInnerHtml(response.playlistHtml);
           playerData.setPlayingIndex();
           context.toLocalStorage();
         },
         onNon200: function (xhr: Record<string, any>) {
-          playlist.innerHTML = "";
           document.getElementById("continue")!.style.display = "";
         },
-        onError: function (xhr: Record<string, any>) {
-          playlist.innerHTML = spinnerHTMLwithHR;
-        },
-        onTimeout: function (xhr: Record<string, any>) {
-          playlist.innerHTML = spinnerHTMLwithHR;
-        },
+        onError: function (xhr: Record<string, any>) {},
+        onTimeout: function (xhr: Record<string, any>) {},
       }
     );
   }
@@ -317,9 +449,6 @@ class PlaylistManager {
       this.hasPlaylist = true;
       this.plid = plid;
       document.getElementById("autoplay-controls")!.style.display = "none";
-      this.createPlaylistNode(true);
-      this.playerData = new PlaylistData().fromJson(playerData);
-      this.playlistNode.innerHTML = this.playerData.getInnerHTML()!;
       this.playerData.setPlayingIndex();
       this.toLocalStorage();
     }
@@ -349,7 +478,7 @@ class PlaylistManager {
       url.searchParams.set("local", this.videoData.params.local);
     return url;
   }
-  next() {
+  private next() {
     let index = this.playerData.nextTrack();
     if (index === undefined) {
       // Here we look if autoplay is enabled and if so we jump to next video while
@@ -375,6 +504,14 @@ class PlaylistManager {
     this.toLocalStorage();
     let url = this.buildUrl(track.id, index);
     location.assign(url.pathname + url.search);
+  }
+  next_video() {
+    if (playlistManager.hasAPlaylistLoaded()) playlistManager.next();
+    else {
+      playlistManager.createPlaylistFrom(video_data.id);
+      playlistManager.addVideo("rv%" + video_data.next_video);
+      playlistManager.next();
+    }
   }
   toggleShuffle() {
     this.playerData.toggleShuffle();
@@ -414,50 +551,20 @@ class PlaylistManager {
     this.plid = "customPlaylist";
     this.playerData = this.readFromLocalStorage();
     this.hasPlaylist = true;
-    this.createPlaylistNode(true);
-    const queryParams = [
-      "listCustom=" + this.plid,
-      this.playerData.isCustomPlaylist()
-        ? "indexCustom=" + this.playerData.getTrackCount()
-        : "index=" + this.playerData.getTrackCount(),
-    ];
     const track = this.trackFromID(video_id, true);
-    const innerHTML =
-      '<h3><a>Current Playlist</a></h3><div class="pure-menu pure-menu-scrollable playlist-restricted"><ol class="pure-menu-list"></ol></div><hr>';
-    let parser = new DOMParser();
-    let doc = parser.parseFromString(innerHTML, "text/html");
-    doc.body.childNodes[1].childNodes[0].appendChild(
-      track.toHtml(queryParams)[0]
-    );
-    this.playlistNode.innerHTML = doc.body.innerHTML;
-    this.playerData.setInnerHtml(doc.body.innerHTML);
+    this.playerData.addTrack(track, false);
     this.playerData.setPlayNextIndexOverwrite(1);
     this.toLocalStorage();
   }
   private trackFromID(video_id: string, fromVideData: boolean): Track {
     let track = new Track(video_id);
-    if(fromVideData)
-      track.fromVideoData(video_data)
-    else
+    if (fromVideData) track.fromVideoData(video_data);
     // Cant be null! Because if this is null, alot broke in invidious since there would a related video without and id.
-    track.FromDivElement(
-      document.getElementById("rv%" + video_id)! as HTMLDivElement
-    );
+    else
+      track.FromDivElement(
+        document.getElementById("rv%" + video_id)! as HTMLDivElement
+      );
     return track;
-  }
-  private createPlaylistNode(addControls: boolean) {
-    if (addControls) {
-      const div: HTMLElement = document.getElementById("related-videos")!;
-      const playlistDiv = new DOMParser().parseFromString(
-        '<div><label for="loop">Loop Playlist</label><input name="loop" id="loop" type="checkbox"><label for="shuffle">Shuffle Playlist</label><input name="shuffle" id="shuffle" type="checkbox"><div id="playlist" class="h-box"></div></div>',
-        "text/html"
-      );
-      div.insertBefore(
-        playlistDiv.body.childNodes[0],
-        div.childNodes[0].nextSibling
-      );
-    }
-    this.playlistNode = document.getElementById("playlist")!;
   }
   private toLocalStorage() {
     try {
@@ -515,7 +622,7 @@ addEventListener("load", (ev) => {
   //@ts-ignore
   continue_autoplay = function (event) {
     if (playlistManager.hasAPlaylistLoaded()) {
-      player.on("ended", playlistManager.next);
+      player.on("ended", next_video);
     } else {
       if (event.target.checked) {
         player.on("ended", next_video);
@@ -533,28 +640,14 @@ addEventListener("load", (ev) => {
 
   // Overrides next video function, used to skip to next video.
   //@ts-ignore
-  next_video = function () {
-    if (playlistManager.hasAPlaylistLoaded()) playlistManager.next();
-    else{
-      playlistManager.createPlaylistFrom(video_data.id);
-      playlistManager.addVideo("rv%"+video_data.next_video);
-      playlistManager.next();
-    }
-  };
+  next_video = playlistManager.next_video;
   // Need to register it here too since continue_autoplay isnt called autmatically
   player.on("ended", () => {
-    if (playlistManager.hasAPlaylistLoaded()) playlistManager.next();
-    else if (
-      video_data.params.autoplay ||
-      video_data.params.continue_autoplay
-    ) {
-      playlistManager.createPlaylistFrom(video_data.id);
-      playlistManager.addVideo("rv%"+video_data.next_video);
-    } else return;
+    playlistManager.next_video();
   });
   // Hook to always load the custom playlist if one was created.
   //if (video_data.plid == undefined || video_data.plid == "")
-    //playlistManager.tryToLoadCustomPlaylist();
+  //playlistManager.tryToLoadCustomPlaylist();
 });
 var playlistManager = new PlaylistManager(video_data);
 var shuffle_button = document.getElementById("shuffle");
@@ -578,7 +671,8 @@ if (loop_button) {
 function updateMediaSession() {
   // Only refresh if the video is loaded and playing
   //@ts-ignore
-  if (!player || player.paused()) return navigator.mediaSession.playbackState = "paused";
+  if (!player || player.paused())
+    return (navigator.mediaSession.playbackState = "paused");
 
   if ("mediaSession" in navigator) {
     // Parse video data
@@ -597,8 +691,8 @@ function updateMediaSession() {
         // ... and will use excessive bandwidth on Mobile, where smaller images are suitable
 
         // Chrome.com docs: Notification artwork size in Chrome for Android is 512x512. For low-end devices, it is 256x256.
-        { src: player_data.thumbnail, sizes: '1280x720', type: 'image/jpg' }
-      ]
+        { src: player_data.thumbnail, sizes: "1280x720", type: "image/jpg" },
+      ],
     });
 
     // Update playback state
@@ -634,14 +728,14 @@ if ("mediaSession" in navigator) {
 
   // Skip forwards
   //@ts-ignore
-  navigator.mediaSession.setActionHandler('seekforward', () => {
+  navigator.mediaSession.setActionHandler("seekforward", () => {
     skip_seconds(5 * player.playbackRate());
     updateMediaSession();
   });
 
   // Skip backwards
   //@ts-ignore
-  navigator.mediaSession.setActionHandler('seekbackward', () => {
+  navigator.mediaSession.setActionHandler("seekbackward", () => {
     skip_seconds(-5 * player.playbackRate());
     updateMediaSession();
   });
