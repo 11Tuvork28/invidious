@@ -168,7 +168,7 @@ module Invidious::Routes::API::Manifest
     local = env.params.query["local"]?.try &.== "true"
 
     env.response.content_type = "application/x-mpegURL"
-    env.response.headers.add("Access-Control-Allow-Origin", "*")
+    env.response.headers["Access-Control-Allow-Origin"] = "*"
 
     manifest = response.body
 
@@ -223,7 +223,7 @@ module Invidious::Routes::API::Manifest
     local = env.params.query["local"]?.try &.== "true"
 
     env.response.content_type = "application/x-mpegURL"
-    env.response.headers.add("Access-Control-Allow-Origin", "*")
+    env.response.headers["Access-Control-Allow-Origin"] = "*"
 
     manifest = response.body
 
