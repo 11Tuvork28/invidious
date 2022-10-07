@@ -72,7 +72,7 @@
     "aspect_ratio" => aspect_ratio,
     "title" => video.title,
     "description" => HTML.escape(video.short_description),
-    "thumbnail" => "https://static.xamh.de"+thumbnail,
+    "thumbnail" => thumbnail,
     "preferred_caption_found" => !preferred_captions.empty?
 }.to_pretty_json
 %>
