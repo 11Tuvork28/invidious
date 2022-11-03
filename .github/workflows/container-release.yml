@@ -67,15 +67,18 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build image and push to GitHub Container Registry
-        uses: docker/build-push-action@v2
+      - name: Build and push Docker AMD64 image without QUIC for Push Event
+        if: github.ref == 'refs/heads/master'
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: docker/Dockerfile
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: release=1
+          build-args: |
+            "release=1"
+            "disable_quic=1"
           push: true
           
       - name: Image digest
