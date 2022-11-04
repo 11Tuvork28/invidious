@@ -201,11 +201,14 @@ variableRateInput.placeholder = "Custom";
 variableRateInput.oninput = (evt) => {
     const nRate = Number(evt.target.value);
     // Verify it's a sane number: no larger an absolute change than 10x and no smaller than 0.1
-    if (Math.abs(nRate) > 10 || Math.abs(nRate) < 0.1) return variableRateInput.style.setProperty('color', "red", "important");
-
-    // Valid! Apply it
-    variableRateInput.style.setProperty('color', "white", "important");
-    player.playbackRate(nRate);
+    if (Math.abs(nRate) <= 10 && Math.abs(nRate) >= 0.1) {
+        // Valid! Apply it
+        variableRateInput.style.setProperty('color', "white", "important");
+        player.playbackRate(Math.abs(nRate));
+    } else {
+        // Not sane, warn!
+        variableRateInput.style.setProperty('color', "red", "important");
+    }
 }
 
 // Prepend the input to the playback rate list
