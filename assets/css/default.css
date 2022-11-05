@@ -243,6 +243,14 @@ input[type="search"]::-webkit-search-cancel-button {
   margin-right: 1em;
 }
 
+.variable-playback-rate-input {
+  background-color: inherit;
+  border-width: 0;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
 @media only screen and (max-aspect-ratio: 16/9) {
   .player-dimensions.vjs-fluid {
     padding-top: 46.86% !important;
