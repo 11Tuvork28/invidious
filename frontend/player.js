@@ -185,6 +185,35 @@ if (isMobile()) {
     });
 }
 
+
+/* Variable Playback Rate plugin */
+
+// Fetch the Playback Rate settings list (contains each button for each setting)
+const playbackRateList = document.getElementsByClassName('vjs-playback-rate')[0].childNodes[2].childNodes[0];
+
+// Create, style (by theme) and inject the Variable Playback Rate input
+const variableRateInput = document.createElement("input");
+variableRateInput.style.setProperty('color', "white", "important");
+variableRateInput.classList.add("variable-playback-rate-input");
+variableRateInput.placeholder = "Custom";
+
+// Add a listener to verify + update the playback rate upon change
+variableRateInput.oninput = (evt) => {
+    const nRate = Number(evt.target.value);
+    // Verify it's a sane number: no larger an absolute change than 10x and no smaller than 0.1
+    if (Math.abs(nRate) <= 10 && Math.abs(nRate) >= 0.1) {
+        // Valid! Apply it
+        variableRateInput.style.setProperty('color', "white", "important");
+        player.playbackRate(Math.abs(nRate));
+    } else {
+        // Not sane, warn!
+        variableRateInput.style.setProperty('color', "red", "important");
+    }
+}
+
+// Prepend the input to the playback rate list
+playbackRateList.prepend(variableRateInput);
+
 // Enable VR video support
 if (!video_data.params.listen && video_data.vr && video_data.params.vr_mode) {
     player.crossOrigin('anonymous');
