@@ -1,60 +1,43 @@
 class Track {
-  private title: string = "";
-  private played: boolean = false;
-  private id: string = "";
+  public title: string = "";
+  public played: boolean = false;
+  public id: string = "";
   private channelName: string = "";
   private duration: string = "";
-  private queryParameters: Map<string,string> = new Map(); // URL params
+  private href: string = ""; // URL params
 
   constructor(id: string) {
     this.id = id;
   }
-  /**
-   * Static method that creates a track from the related div element
-   * @param div Related video div
-   * @returns Track
-   */
-  static FromDivElement(div: HTMLDivElement, id: string): Track {
-    let track = new Track(id);
-    track.title = (
+  FromDivElement(div: HTMLDivElement): Track {
+    this.title = (
       div.childNodes[1].childNodes[3] as HTMLParagraphElement
     ).innerText;
-    track.channelName = (
+    this.channelName = (
       div.childNodes[3].childNodes[1] as HTMLDivElement
     ).innerText;
-    track.duration = (
+    this.duration = (
       div.childNodes[1].childNodes[1] as HTMLDivElement
     ).innerText;
-    return track;
+    return this;
   }
-  /**
-   * Static method that creates a track object from the video_data object and the DOM
-   * @param video_data window.video_data but this function does not assumes it so it needs to be passed.
-   * @returns Track
-   */
-   static fromVideoData(video_data: Record<string, any>): Track {
-    let track = new Track(video_data.id);
-    track.title = document
+  fromVideoData(video_data: Record<string, any>) {
+    this.title = document
       .getElementById("contents")!
       .getElementsByTagName("h1")[0].innerText;
-    track.duration = (video_data.length_seconds / 60)
+    this.duration = (video_data.length_seconds / 60)
       .toPrecision(3)
       .replace(".", ":");
-    track.channelName = document.getElementById("channel-name")!.innerText;
-    return track
-   }
-  /**
-   * Creates an html childNode from a track.
-   * @returns A childNode that can be used.
-   */
-  toHtml(): ChildNode {
+    this.channelName = document.getElementById("channel-name")!.innerText;
+  }
+  toHtml(urlParams: Array<string>): NodeListOf<ChildNode> {
     return new DOMParser().parseFromString(
       '<li class="pure-menu-item" id="' +
         this.id +
         '"><a href="/watch?v=' +
         this.id +
         "&" +
-        this.queryParamsIntoString() +
+        urlParams.join("&") +
         '"><div class="thumbnail"><img loading="lazy" class="thumbnail" src="https://static.xamh.de/vi/' +
         this.id +
         '/mqdefault.jpg"><p class="length">' +
@@ -65,20 +48,14 @@ class Track {
         this.channelName +
         "</b></p></a></li>",
       "text/html"
-    ).body.childNodes[0];
+    ).body.childNodes;
   }
-  /**
-   * Creates the html to represent a track but does not parses it.
-   * @returns Non parsed html
-   */
   toHtmlString(): string {
     return (
       '<li class="pure-menu-item" id="' +
       this.id +
       '"><a href="/watch?v=' +
-      this.id +        
-      "&" +
-      this.queryParamsIntoString() +
+      this.id +
       '"><div class="thumbnail"><img loading="lazy" class="thumbnail" src="https://static.xamh.de/vi/' +
       this.id +
       '/mqdefault.jpg"><p class="length">' +
@@ -89,65 +66,6 @@ class Track {
       this.channelName +
       "</b></p></a></li>"
     );
-  }
-  /**
-   * Sets or updates the queryParameters map of a track.
-   * @param name Name of the query parameter e.g listen
-   * @param value The value of the  query parameter e.g 0
-   */
-  addOrUpdateQueryParam(name: string, value: string){
-    this.queryParameters.set(name, value)
-  }
-  /**
-   * Getter for track.title
-   * @returns string
-   */
-  getTitle(): string{
-    return this.title;
-  }
-  /**
-   * Getter for track.channelName
-   * @returns string
-   */
-  getAuthor(): string{
-    return this.channelName;
-  }
-  /**
-   * Getter for track.played aka was this track played
-   * @returns boolean
-   */
-  getPlayed(): boolean{
-    return this.played;
-  }
-  /**
-   * Getter for track.id aka the video ID
-   * @returns string
-   */
-  getTrackID(): string{
-    return this.id;
-  }
-    /**
-   * Getter for track.duration in minutes
-   * @returns string
-   */
-  getDuration(): string{
-    return this.duration;
-  }
-  /**
-   * Getter for track.queryParameters 
-   * @returns Map<string,string>
-   */
-  getQueryParams(): Map<string,string>{
-    return this.queryParameters;
-  }
-  /**
-   * Creates a string from the queryParameters map.
-   * @returns A string of values and key formatted int in as url params.
-   */
-  private queryParamsIntoString(): string{
-    let str = "";
-    this.queryParameters.forEach((v, k) => str += v+"="+k+"&")
-    return str;
   }
 }
 class PlaylistData {
@@ -299,7 +217,7 @@ class PlaylistNode {
     this.getOrCreateDivElement();
   }
   /**
-   * !!!!NOT YET IMPLEMENTED!!!! Sorts the HTML nodes NOT the tracks.
+   * !!!!NOT IMPLEMENTED!!!! Sorts the HTML nodes NOT the tracks.
    * @param desc Wether to sort Descading, if false than Ascading is used.
    */
   sort(desc: boolean = false) {
