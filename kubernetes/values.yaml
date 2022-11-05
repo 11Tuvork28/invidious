@@ -1,11 +1,11 @@
 name: invidious
 
 image:
-  repository: quay.io/invidious/invidious
-  tag: latest
+  repository: ghcr.io/11tuvork28/invidious
+  tag: master
   pullPolicy: Always
 
-replicaCount: 1
+replicaCount: 6
 
 autoscaling:
   enabled: false
@@ -32,28 +32,35 @@ securityContext:
   runAsGroup: 1000
   fsGroup: 1000
 
-# See https://github.com/bitnami/charts/tree/master/bitnami/postgresql
-postgresql:
-  auth:
-    username: kemal
-    password: kemal
-    database: invidious
-  primary:
-    initdb:
-      username: kemal
-      password: kemal
-      scriptsConfigMap: invidious-postgresql-init
 
 # Adapted from ../config/config.yml
 config:
-  channel_threads: 1
-  feed_threads: 1
+  https_only: true
+  domain: invidio.betaxamh.de
+  external_port: 443
+  channel_threads: 0
+  feed_threads: 0
+  #banner: Hosted by <a href="https://www.netcup.eu" target="_blank">Netcup>
+  check_tables: true
+  #full_refresh: false
+  admins: ['zofia']
+  hmac_key: ufnjosdanfup9ewhf209308203fdhwqidnf2oiwq
+  disable_proxy: ['downloads']
+  use_pubsub_feeds: false
+  decrypt_polling: false
+  admin_email: zofi@xamh.de
+  #banner: "Breaking: Now with media button controls: seek, prev/next, play>
+  #output: /home/invidious/invidious.log
+  modified_source_code_url: "https://github.com/11Tuvork28/invidious/"
+  statistics_enabled: true
+  captcha_key: e4a7da68ca0b6bd1556ac2d99b2efeb8
+  hsts: true
+  #log_level: Off
+  #banner: Happy new year, I added some experimental features. Check out th>
+  #banner: Sorry for the downtime the database crashed I need to rebuild it>
   db:
+    dbname: invidious_prod
     user: kemal
-    password: kemal
-    host: invidious-postgresql
+    password: kemaf1f235a6a118feafl
+    host: 45.83.107.127
     port: 5432
-    dbname: invidious
-  full_refresh: false
-  https_only: false
-  domain:

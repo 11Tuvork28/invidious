@@ -6,6 +6,10 @@ metadata:
     app: {{ template "invidious.name" . }}
     chart: {{ .Chart.Name }}
     release: {{ .Release.Name }}
+  annotations:
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.name: sticky
+    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -15,6 +19,3 @@ spec:
   selector:
     app: {{ template "invidious.name" . }}
     release: {{ .Release.Name }}
-{{- if .Values.service.loadBalancerIP }}
-  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
-{{- end }}
