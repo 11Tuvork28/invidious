@@ -24,6 +24,8 @@ struct VideoPreferences
   property volume : Int32
   property vr_mode : Bool
   property save_player_pos : Bool
+  property exclude_music_save_player_pos : Bool
+  property disable_new_playlist_player : Bool
 end
 
 def process_video_params(query, preferences)
@@ -46,6 +48,8 @@ def process_video_params(query, preferences)
   volume = query["volume"]?.try &.to_i?
   vr_mode = query["vr_mode"]?.try { |q| (q == "true" || q == "1").to_unsafe }
   save_player_pos = query["save_player_pos"]?.try { |q| (q == "true" || q == "1").to_unsafe }
+  exclude_music_save_player_pos = query["exclude_music_save_player_pos"]?.try { |q| (q == "true" || q == "1").to_unsafe }
+  disable_new_playlist_player = query["disable_new_playlist_player"]?.try { |q| (q == "true" || q == "1").to_unsafe }
 
   if preferences
     # region ||= preferences.region
@@ -67,6 +71,8 @@ def process_video_params(query, preferences)
     volume ||= preferences.volume
     vr_mode ||= preferences.vr_mode.to_unsafe
     save_player_pos ||= preferences.save_player_pos.to_unsafe
+    exclude_music_save_player_pos ||= preferences.exclude_music_save_player_pos.to_unsafe
+    disable_new_playlist_player ||= preferences.disable_new_playlist_player.to_unsafe
   end
 
   annotations ||= CONFIG.default_user_preferences.annotations.to_unsafe
@@ -87,6 +93,8 @@ def process_video_params(query, preferences)
   volume ||= CONFIG.default_user_preferences.volume
   vr_mode ||= CONFIG.default_user_preferences.vr_mode.to_unsafe
   save_player_pos ||= CONFIG.default_user_preferences.save_player_pos.to_unsafe
+  exclude_music_save_player_pos ||= CONFIG.default_user_preferences.exclude_music_save_player_pos.to_unsafe
+  disable_new_playlist_player ||= CONFIG.default_user_preferences.disable_new_playlist_player.to_unsafe
 
   annotations = annotations == 1
   autoplay = autoplay == 1
@@ -99,6 +107,8 @@ def process_video_params(query, preferences)
   extend_desc = extend_desc == 1
   vr_mode = vr_mode == 1
   save_player_pos = save_player_pos == 1
+  exclude_music_save_player_pos = exclude_music_save_player_pos == 1
+  disable_new_playlist_player = disable_new_playlist_player == 1
 
   if CONFIG.disabled?("dash") && quality == "dash"
     quality = "high"
@@ -127,29 +137,31 @@ def process_video_params(query, preferences)
   controls = controls >= 1
 
   params = VideoPreferences.new({
-    annotations:        annotations,
-    autoplay:           autoplay,
-    comments:           comments,
-    continue:           continue,
-    continue_autoplay:  continue_autoplay,
-    controls:           controls,
-    listen:             listen,
-    local:              local,
-    player_style:       player_style,
-    preferred_captions: preferred_captions,
-    quality:            quality,
-    quality_dash:       quality_dash,
-    raw:                raw,
-    region:             region,
-    related_videos:     related_videos,
-    speed:              speed,
-    video_end:          video_end,
-    video_loop:         video_loop,
-    extend_desc:        extend_desc,
-    video_start:        video_start,
-    volume:             volume,
-    vr_mode:            vr_mode,
-    save_player_pos:    save_player_pos,
+    annotations:                   annotations,
+    autoplay:                      autoplay,
+    comments:                      comments,
+    continue:                      continue,
+    continue_autoplay:             continue_autoplay,
+    controls:                      controls,
+    listen:                        listen,
+    local:                         local,
+    player_style:                  player_style,
+    preferred_captions:            preferred_captions,
+    quality:                       quality,
+    quality_dash:                  quality_dash,
+    raw:                           raw,
+    region:                        region,
+    related_videos:                related_videos,
+    speed:                         speed,
+    video_end:                     video_end,
+    video_loop:                    video_loop,
+    extend_desc:                   extend_desc,
+    video_start:                   video_start,
+    volume:                        volume,
+    vr_mode:                       vr_mode,
+    save_player_pos:               save_player_pos,
+    exclude_music_save_player_pos: exclude_music_save_player_pos,
+    disable_new_playlist_player:   disable_new_playlist_player,
   })
 
   return params
