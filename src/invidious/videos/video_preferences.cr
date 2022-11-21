@@ -24,11 +24,8 @@ struct VideoPreferences
   property volume : Int32
   property vr_mode : Bool
   property save_player_pos : Bool
-<<<<<<< HEAD
   property exclude_music_save_player_pos : Bool
   property disable_new_playlist_player : Bool
-=======
->>>>>>> a6286f61b7aa27f0b679b2f90671148aa4ce297a
 end
 
 def process_video_params(query, preferences)
