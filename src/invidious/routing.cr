@@ -38,7 +38,9 @@ module Invidious::Routing
       get "/feed/webhook/:token", Routes::Feeds, :push_notifications_get
       post "/feed/webhook/:token", Routes::Feeds, :push_notifications_post
 
-      get "/modify_notifications", Routes::Notifications, :modify
+      if CONFIG.enable_user_notifications
+        get "/modify_notifications", Routes::Notifications, :modify
+      end
     {% end %}
 
     self.register_image_routes
@@ -261,8 +263,10 @@ module Invidious::Routing
       post "/api/v1/auth/tokens/register", {{namespace}}::Authenticated, :register_token
       post "/api/v1/auth/tokens/unregister", {{namespace}}::Authenticated, :unregister_token
 
-      get "/api/v1/auth/notifications", {{namespace}}::Authenticated, :notifications
-      post "/api/v1/auth/notifications", {{namespace}}::Authenticated, :notifications
+      if CONFIG.enable_user_notifications
+        get "/api/v1/auth/notifications", {{namespace}}::Authenticated, :notifications
+        post "/api/v1/auth/notifications", {{namespace}}::Authenticated, :notifications
+      end
 
       # Misc
       get "/api/v1/stats", {{namespace}}::Misc, :stats
