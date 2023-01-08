@@ -264,7 +264,7 @@ class PlaylistManager {
     var plid_url;
     if (this.plid.startsWith("RD")) {
       plid_url =
-        "https://api.xamh.de/api/v1/mixes/" +
+        "/api/v1/mixes/" +
         this.plid +
         "?continuation=" +
         this.videoData.id +
@@ -273,7 +273,7 @@ class PlaylistManager {
     } else {
       // We want to always ask for index  0 so that we get the whole playlist^^
       plid_url =
-        "https://api.xamh.de/api/v1/playlists/" +
+        "/api/v1/playlists/" +
         this.plid +
         "?index=0&continuation=" +
         this.videoData.id +

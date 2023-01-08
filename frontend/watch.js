@@ -108,11 +108,11 @@ function get_playlist(plid) {
 
     var plid_url;
     if (plid.startsWith('RD')) {
-        plid_url = 'https://api.xamh.de/api/v1/mixes/' + plid +
+        plid_url = '/api/v1/mixes/' + plid +
             '?continuation=' + video_data.id +
             '&format=html&hl=' + video_data.preferences.locale;
     } else {
-        plid_url = 'https://api.xamh.de/api/v1/playlists/' + plid +
+        plid_url = '/api/v1/playlists/' + plid +
             '?index=' + video_data.index +
             '&continuation=' + video_data.id +
             '&format=html&hl=' + video_data.preferences.locale;
@@ -163,7 +163,7 @@ function get_reddit_comments() {
     var fallback = comments.innerHTML;
     comments.innerHTML = spinnerHTML;
 
-    var url = 'https://api.xamh.de/api/v1/comments/' + video_data.id +
+    var url = '/api/v1/comments/' + video_data.id +
         '?source=reddit&format=html' +
         '&hl=' + video_data.preferences.locale;
 
@@ -212,7 +212,7 @@ function get_youtube_comments() {
     var fallback = comments.innerHTML;
     comments.innerHTML = spinnerHTML;
 
-    var url = 'https://api.xamh.de/api/v1/comments/' + video_data.id +
+    var url = '/api/v1/comments/' + video_data.id +
         '?format=html' +
         '&hl=' + video_data.preferences.locale +
         '&thin_mode=' + video_data.preferences.thin_mode;
@@ -268,7 +268,7 @@ function get_youtube_replies(target, load_more, load_replies) {
     var fallback = body.innerHTML;
     body.innerHTML = spinnerHTML;
 
-    var url = 'https://api.xamh.de/api/v1/comments/' + video_data.id +
+    var url = '/api/v1/comments/' + video_data.id +
         '?format=html' +
         '&hl=' + video_data.preferences.locale +
         '&thin_mode=' + video_data.preferences.thin_mode +
