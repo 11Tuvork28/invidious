@@ -281,7 +281,7 @@ module Invidious::Routes::VideoPlayback
     end
 
     if local
-      url = URI.parse(url).request_target.not_nil!
+      url = "https://proxy." + CONFIG.domain.not_nil! + URI.parse(url).request_target.not_nil!
       url += "&title=#{URI.encode_www_form(title, space_to_plus: false)}" if title
     end
 
