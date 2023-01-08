@@ -23,9 +23,9 @@ module Invidious::Routes::BeforeAll
     # Allow media resources to be loaded from google servers
     # TODO: check if *.youtube.com can be removed
     if CONFIG.disabled?("local") || !preferences.local
-      extra_media_csp = " https://*.googlevideo.com:443 https://*.youtube.com:443"
+      extra_media_csp = " https://*.googlevideo.com:443 https://*.youtube.com:443 https://proxy.invidio.xamh.de:443"
     else
-      extra_media_csp = ""
+      extra_media_csp = " https://proxy.invidio.xamh.de:443"
     end
 
     # Only allow the pages at /embed/* to be embedded
@@ -43,7 +43,7 @@ module Invidious::Routes::BeforeAll
       "style-src 'self' static.xamh.de 'unsafe-inline'",
       "img-src 'self' static.xamh.de data:",
       "font-src 'self' static.xamh.de data:",
-      "connect-src 'self'  api.xamh.de",
+      "connect-src 'self'  proxy.invidio.xamh.de",
       "manifest-src 'self'  api.xamh.de",
       "media-src 'self' static.xamh.de api.xamh.de blob:" + extra_media_csp,
       "child-src 'self' blob:",
