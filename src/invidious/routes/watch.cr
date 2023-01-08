@@ -164,7 +164,7 @@ module Invidious::Routes::Watch
 
     aspect_ratio = "16:9"
 
-    thumbnail = "https://proxy.invidio.xamh.de/vi/#{video.id}/maxres.jpg?host=i.ytimg.com"
+    thumbnail = "https://proxy.invidio.xamh.de/vi/#{video.id}/maxresdefault.jpg?host=i.ytimg.com"
 
     if params.raw
       if params.listen

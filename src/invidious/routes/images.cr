@@ -237,7 +237,7 @@ module Invidious::Routes::Images
 
     if name == "maxres.jpg"
       build_thumbnails(id).each do |thumb|
-        thumbnail_resource_path = "https://proxy.invidio.xamh.de/vi/#{id}/#{thumb[:url]}.jpg?host=i.ytimg.com"
+        thumbnail_resource_path = "/vi/#{id}/#{thumb[:url]}.jpg"
         # Logic here is short enough that manually typing them out should be fine.
         {% unless flag?(:disable_quic) %}
           if CONFIG.use_quic
