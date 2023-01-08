@@ -64,7 +64,7 @@ module Invidious::Routes::BeforeAll
 
     return if {
                 "/sb/",
-                "/vi/",
+                "https://proxy.invidio.xamh.de/",
                 "/s_p/",
                 "/yts/",
                 "/ggpht/",

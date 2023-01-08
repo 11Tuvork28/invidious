@@ -10,7 +10,7 @@
 <meta property="og:site_name" content="<%= author %> | Invidious">
 <meta property="og:url" content="<%= HOST_URL %>/watch?v=<%= video.id %>">
 <meta property="og:title" content="<%= title %>">
-<meta property="og:image" content="/vi/<%= video.id %>/maxres.jpg?host=i.ytimg.com">
+<meta property="og:image" content="https://proxy.invidio.xamh.de/<%= video.id %>/maxres.jpg?host=i.ytimg.com">
 <meta property="og:description" content="<%= HTML.escape(video.short_description) %>">
 <meta property="og:type" content="video.other">
 <meta property="og:video:url" content="<%= HOST_URL %>/embed/<%= video.id %>">
@@ -22,7 +22,7 @@
 <meta name="twitter:url" content="<%= HOST_URL %>/watch?v=<%= video.id %>">
 <meta name="twitter:title" content="<%= title %>">
 <meta name="twitter:description" content="<%= HTML.escape(video.short_description) %>">
-<meta name="twitter:image" content="/vi/<%= video.id %>/maxres.jpg?host=i.ytimg.com">
+<meta name="twitter:image" content="https://proxy.invidio.xamh.de/<%= video.id %>/maxres.jpg?host=i.ytimg.com">
 <meta name="twitter:player" content="<%= HOST_URL %>/embed/<%= video.id %>">
 <meta name="twitter:player:width" content="1280">
 <meta name="twitter:player:height" content="720">
@@ -311,7 +311,7 @@ we're going to need to do it here in order to allow for translations.
                             <a href="/watch?v=<%= rv["id"] %>&listen=<%= params.listen %>">
                                 <% if !env.get("preferences").as(Preferences).thin_mode %>
                                     <div class="thumbnail">
-                                        <img loading="lazy" class="thumbnail" src="/vi/<%= rv["id"] %>/mqdefault.jpg?host=i.ytimg.com?host=i.ytimg.com">
+                                        <img loading="lazy" class="thumbnail" src="https://proxy.invidio.xamh.de/<%= rv["id"] %>/mqdefault.jpg?host=i.ytimg.com?host=i.ytimg.com">
                                         <p class="length"><%= recode_length_seconds(rv["length_seconds"]?.try &.to_i? || 0) %></p>
                                     </div>
                                 <% end %>
