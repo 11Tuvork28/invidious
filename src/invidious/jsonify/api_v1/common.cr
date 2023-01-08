@@ -8,7 +8,7 @@ module Invidious::JSONify::APIv1
       build_thumbnails(id).each do |thumbnail|
         json.object do
           json.field "quality", thumbnail[:name]
-          json.field "url", "#{thumbnail[:host]}https://proxy.invidio.xamh.de/#{id}/#{thumbnail["url"]}.jpg?host=i.ytimg.com"
+          json.field "url", "#{thumbnail[:host]}https://proxy.invidio.xamh.de/vi/#{id}/#{thumbnail["url"]}.jpg?host=i.ytimg.com"
           json.field "width", thumbnail[:width]
           json.field "height", thumbnail[:height]
         end

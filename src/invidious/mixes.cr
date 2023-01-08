@@ -97,7 +97,7 @@ def template_mix(mix)
       <li class="pure-menu-item">
         <a href="/watch?v=#{video["videoId"]}&list=#{mix["mixId"]}">
           <div class="thumbnail">
-              <img loading="lazy" class="thumbnail" src="https://proxy.invidio.xamh.de/#{video["videoId"]}/mqdefault.jpg?host=i.ytimg.com">
+              <img loading="lazy" class="thumbnail" src="https://proxy.invidio.xamh.de/vi/#{video["videoId"]}/mqdefault.jpg?host=i.ytimg.com">
               <p class="length">#{recode_length_seconds(video["lengthSeconds"].as_i)}</p>
           </div>
           <p style="width:100%">#{video["title"]}</p>

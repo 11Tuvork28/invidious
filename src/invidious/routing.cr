@@ -199,7 +199,7 @@ module Invidious::Routing
     get "/sb/:authority/:id/:storyboard/:index", Routes::Images, :get_storyboard
     get "/s_p/:id/:name", Routes::Images, :s_p_image
     get "/yts/img/:name", Routes::Images, :yts_image
-    get "https://proxy.invidio.xamh.de/:id/:name", Routes::Images, :thumbnails
+    get "/vi/:id/:name", Routes::Images, :thumbnails
   end
 
   # -------------------
