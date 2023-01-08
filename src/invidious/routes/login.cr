@@ -328,7 +328,6 @@ module Invidious::Routes::Login
           sid = Base64.urlsafe_encode(Random::Secure.random_bytes(32))
           Invidious::Database::SessionIDs.insert(sid, email)
 
-
           env.response.cookies["SID"] = Invidious::User::Cookies.sid(CONFIG.domain, sid)
         else
           return error_template(401, "Wrong username or password")
