@@ -38,16 +38,16 @@ module Invidious::Routes::BeforeAll
     # TODO: Remove style-src's 'unsafe-inline', requires to remove all
     # inline styles (<style> [..] </style>, style=" [..] ")
     env.response.headers["Content-Security-Policy"] = {
-      "default-src 'none' static.xamh.de",
+      "default-src 'none' *.xamh.de",
       "script-src 'self' static.xamh.de",
       "style-src 'self' static.xamh.de 'unsafe-inline'",
-      "img-src 'self' static.xamh.de data:",
+      "img-src 'self' proxy.invidio.xamh.de data:",
       "font-src 'self' static.xamh.de data:",
       "connect-src 'self'  proxy.invidio.xamh.de",
-      "manifest-src 'self'  api.xamh.de",
-      "media-src 'self' static.xamh.de api.xamh.de blob:" + extra_media_csp,
+      "manifest-src 'self'  *.xamh.de",
+      "media-src 'self' *.xamh.de:443 blob:" + extra_media_csp,
       "child-src 'self' blob:",
-      "frame-src 'self'  api.xamh.de",
+      "frame-src 'self'  *.xamh.de",
       "frame-ancestors " + frame_ancestors,
     }.join("; ")
     env.response.headers["Access-Control-Allow-Origin"] = "*"
