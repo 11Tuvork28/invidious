@@ -72,7 +72,7 @@ module Invidious::Routes::API::Manifest
                 codecs = fmt["mimeType"].as_s.split("codecs=")[1].strip('"')
                 bandwidth = fmt["bitrate"].as_i
                 itag = fmt["itag"].as_i
-                url = "https://proxy.#{CONFIG.domain.not_nil!}" + fmt["url"].as_s
+                url = "https://proxy.invidio.xamh.de" + fmt["url"].as_s
 
                 xml.element("Role", schemeIdUri: "urn:mpeg:dash:role:2011", value: i == 0 ? "main" : "alternate")
 
@@ -203,7 +203,7 @@ module Invidious::Routes::API::Manifest
 
         raw_params["local"] = "true"
 
-        "https://proxy.#{CONFIG.domain.not_nil!}/videoplayback?#{raw_params}"
+        "https://proxy.invidio.xamh.de/videoplayback?#{raw_params}"
       end
     end
 
@@ -226,7 +226,7 @@ module Invidious::Routes::API::Manifest
     manifest = response.body
 
     if local
-      manifest = manifest.gsub("https://www.youtube.com", "https://proxy.#{CONFIG.domain.not_nil!}")
+      manifest = manifest.gsub("https://www.youtube.com", "https://proxy.invidio.xamh.de")
       manifest = manifest.gsub("index.m3u8", "index.m3u8?local=true")
     end
 
