@@ -51,6 +51,8 @@ module Invidious::Routes::Search
     else
       user = env.get? "user"
 
+      user = user ? user.as(User) : nil
+
       begin
         videos = query.process
       rescue ex : ChannelSearchException
