@@ -29,7 +29,7 @@ module Invidious::Routes::API::Manifest
 
         if local
           uri = URI.parse(url)
-          url = "https://proxy.#{CONFIG.domain.not_nil!}/host/#{uri.host}/"
+          url = "https://proxy.invidio.xamh.de/host/#{uri.host}/"
         end
 
         "<BaseURL>#{url}</BaseURL>"
@@ -104,7 +104,7 @@ module Invidious::Routes::API::Manifest
                 codecs = fmt["mimeType"].as_s.split("codecs=")[1].strip('"')
                 bandwidth = fmt["bitrate"].as_i
                 itag = fmt["itag"].as_i
-                url = "https://proxy.#{CONFIG.domain.not_nil!}" + fmt["url"].as_s
+                url = "https://proxy.invidio.xamh.de" + fmt["url"].as_s
                 width = fmt["width"].as_i
                 height = fmt["height"].as_i
 
