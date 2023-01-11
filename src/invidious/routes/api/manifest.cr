@@ -29,12 +29,11 @@ module Invidious::Routes::API::Manifest
 
         if local
           uri = URI.parse(url)
-          url = "https://proxy.invidio.xamh.de/host/#{uri.host}/"
+          url = "https://proxy.invidio.xamh.de/#{uri.request_target}/host/#{uri.host}/"
         end
 
         "<BaseURL>#{url}</BaseURL>"
       end
-
       return manifest
     end
 
