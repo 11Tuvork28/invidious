@@ -20,23 +20,6 @@ module Invidious::Routes::API::Manifest
       haltf env, status_code: 403
     end
 
-    if dashmpd = video.dash_manifest_url
-      manifest = YT_POOL.client &.get(URI.parse(dashmpd).request_target).body
-
-      manifest = manifest.gsub(/<BaseURL>[^<]+<\/BaseURL>/) do |baseurl|
-        url = baseurl.lchop("<BaseURL>")
-        url = url.rchop("</BaseURL>")
-
-        if local
-          uri = URI.parse(url)
-          url = "https://proxy.invidio.xamh.de/#{uri.request_target}/host/#{uri.host}/"
-        end
-
-        "<BaseURL>#{url}</BaseURL>"
-      end
-      return manifest
-    end
-
     adaptive_fmts = video.adaptive_fmts
 
     if local
