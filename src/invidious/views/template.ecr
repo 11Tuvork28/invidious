@@ -52,16 +52,6 @@
                             </a>
                         </div>
                         <div class="pure-u-1-4">
-                            <a id="notification_ticker" title="<%= translate(locale, "Subscriptions") %>" href="/feed/subscriptions" class="pure-menu-heading">
-                                <% notification_count = env.get("user").as(Invidious::User).notifications.size %>
-                                <% if CONFIG.enable_user_notifications && notification_count > 0 %>
-                                    <span id="notification_count"><%= notification_count %></span> <i class="icon ion-ios-notifications"></i>
-                                <% else %>
-                                    <i class="icon ion-ios-notifications-outline"></i>
-                                <% end %>
-                            </a>
-                        </div>
-                        <div class="pure-u-1-4">
                             <a title="<%= translate(locale, "Preferences") %>" href="/preferences?referer=<%= env.get?("current_page") %>" class="pure-menu-heading">
                                 <i class="icon ion-ios-cog"></i>
                             </a>
