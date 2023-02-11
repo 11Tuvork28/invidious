@@ -46,6 +46,7 @@ struct ConfigPreferences
   property save_player_pos : Bool = true
   property exclude_music_save_player_pos : Bool = false
   property disable_new_playlist_player : Bool = false
+  property hide_video_shorter_than : Float32 = 60.0_f32
 
   def to_tuple
     {% begin %}

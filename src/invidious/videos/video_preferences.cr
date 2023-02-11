@@ -26,6 +26,7 @@ struct VideoPreferences
   property save_player_pos : Bool
   property exclude_music_save_player_pos : Bool
   property disable_new_playlist_player : Bool
+  property hide_video_shorter_than : Float32
 end
 
 def process_video_params(query, preferences)
@@ -50,7 +51,7 @@ def process_video_params(query, preferences)
   save_player_pos = query["save_player_pos"]?.try { |q| (q == "true" || q == "1").to_unsafe }
   exclude_music_save_player_pos = query["exclude_music_save_player_pos"]?.try { |q| (q == "true" || q == "1").to_unsafe }
   disable_new_playlist_player = query["disable_new_playlist_player"]?.try { |q| (q == "true" || q == "1").to_unsafe }
-
+  hide_video_shorter_than = query["hide_video_shorter_than"]?.try &.to_f32?
   if preferences
     # region ||= preferences.region
     annotations ||= preferences.annotations.to_unsafe
@@ -73,6 +74,7 @@ def process_video_params(query, preferences)
     save_player_pos ||= preferences.save_player_pos.to_unsafe
     exclude_music_save_player_pos ||= preferences.exclude_music_save_player_pos.to_unsafe
     disable_new_playlist_player ||= preferences.disable_new_playlist_player.to_unsafe
+    hide_video_shorter_than ||= preferences.hide_video_shorter_than
   end
 
   annotations ||= CONFIG.default_user_preferences.annotations.to_unsafe
@@ -95,6 +97,7 @@ def process_video_params(query, preferences)
   save_player_pos ||= CONFIG.default_user_preferences.save_player_pos.to_unsafe
   exclude_music_save_player_pos ||= CONFIG.default_user_preferences.exclude_music_save_player_pos.to_unsafe
   disable_new_playlist_player ||= CONFIG.default_user_preferences.disable_new_playlist_player.to_unsafe
+  hide_video_shorter_than ||= CONFIG.default_user_preferences.hide_video_shorter_than
 
   annotations = annotations == 1
   autoplay = autoplay == 1
@@ -162,6 +165,7 @@ def process_video_params(query, preferences)
     save_player_pos:               save_player_pos,
     exclude_music_save_player_pos: exclude_music_save_player_pos,
     disable_new_playlist_player:   disable_new_playlist_player,
+    hide_video_shorter_than:       hide_video_shorter_than,
   })
 
   return params

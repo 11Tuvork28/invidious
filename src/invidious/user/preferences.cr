@@ -57,6 +57,7 @@ struct Preferences
   property save_player_pos : Bool = CONFIG.default_user_preferences.save_player_pos
   property exclude_music_save_player_pos : Bool = CONFIG.default_user_preferences.exclude_music_save_player_pos
   property disable_new_playlist_player : Bool = CONFIG.default_user_preferences.disable_new_playlist_player
+  property hide_video_shorter_than : Float32 = CONFIG.default_user_preferences.hide_video_shorter_than
 
   module BoolToString
     def self.to_json(value : String, json : JSON::Builder)

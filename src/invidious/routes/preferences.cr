@@ -86,6 +86,9 @@ module Invidious::Routes::PreferencesRoute
     disable_new_playlist_player ||= "off"
     disable_new_playlist_player = disable_new_playlist_player == "on"
 
+    hide_video_shorter_than = env.params.body["hide_video_shorter_than"]?.try &.as(String).to_f32?
+    hide_video_shorter_than ||= CONFIG.default_user_preferences.hide_video_shorter_than
+
     show_nick = env.params.body["show_nick"]?.try &.as(String)
     show_nick ||= "off"
     show_nick = show_nick == "on"
@@ -185,6 +188,7 @@ module Invidious::Routes::PreferencesRoute
       save_player_pos:               save_player_pos,
       exclude_music_save_player_pos: exclude_music_save_player_pos,
       disable_new_playlist_player:   disable_new_playlist_player,
+      hide_video_shorter_than:       hide_video_shorter_than,
     }.to_json)
 
     if user = env.get? "user"

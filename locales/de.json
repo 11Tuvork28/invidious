@@ -398,6 +398,7 @@
     "videoinfo_watch_on_youTube": "Auf YouTube ansehen",
     "preferences_quality_dash_label": "Bevorzugte DASH-Videoqualität: ",
     "preferences_disable_new_playlist_player": "Alten playlist player nutzen anstatt dem neuen: ",
+    "hide_video_shorter_than": "Videos die kürzer als angegeben nicht anzeigen(In sekunden): ",
     "generic_subscribers_count": "{{count}} Abonnent",
     "generic_subscribers_count_plural": "{{count}} Abonnenten",
     "generic_videos_count": "{{count}} Video",

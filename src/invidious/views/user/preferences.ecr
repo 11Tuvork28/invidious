@@ -128,6 +128,10 @@
                 <label for="disable_new_playlist_player"><%= translate(locale, "preferences_disable_new_playlist_player") %></label>
                 <input name="disable_new_playlist_player" id="disable_new_playlist_player" type="checkbox" <% if preferences.disable_new_playlist_player %>checked<% end %>>
             </div>
+            <div class="pure-control-group">
+                <label for="hide_video_shorter_than"><%= translate(locale, "preferences_hide_video_shorter_than") %></label>
+                <input name="hide_video_shorter_than" id="hide_video_shorter_than" type="input"  <% if preferences.hide_video_shorter_than %>value="<%= preferences.hide_video_shorter_than %>"<% end %>>
+            </div>
             <legend><%= translate(locale, "preferences_category_visual") %></legend>
 
             <div class="pure-control-group">
