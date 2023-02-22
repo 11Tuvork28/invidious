@@ -67,6 +67,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      - name: Set tag date-SHA
+        id: tag
+        run: echo "tag=$(date +'%Y-%m-%d')-$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
+        
       - name: Build and push Docker AMD64 image without QUIC for Push Event
         if: github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v3
@@ -74,7 +78,10 @@ jobs:
           context: .
           file: docker/Dockerfile
           platforms: linux/amd64
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: 
+            ghcr.io/thekitty-zone/thekitty.zone:latest
+            ghcr.io/thekitty-zone/thekitty.zone:${{ env.tag }}
+            ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             "release=1"
