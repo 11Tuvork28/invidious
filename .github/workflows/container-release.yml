@@ -79,8 +79,8 @@ jobs:
           file: docker/Dockerfile
           platforms: linux/amd64
           tags: 
-            ghcr.io/thekitty-zone/thekitty.zone:latest
-            ghcr.io/thekitty-zone/thekitty.zone:${{ env.tag }}
+            ghcr.io/thekitty-zone/invidious:latest
+            ghcr.io/thekitty-zone/invidious:${{ env.tag }}
             ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
