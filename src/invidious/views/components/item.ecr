@@ -1,7 +1,7 @@
-<div class="pure-u-1 pure-u-md-1-4">
-    <div class="h-box">
-        <% case item when %>
-        <% when SearchChannel %>
+<% case item when %>
+<% when SearchChannel %>
+    <div class="pure-u-1 pure-u-md-1-4">
+        <div class="h-box">
             <a href="/channel/<%= item.ucid %>">
                 <% if !env.get("preferences").as(Preferences).thin_mode %>
                     <center>
@@ -13,7 +13,11 @@
             <p><%= translate_count(locale, "generic_subscribers_count", item.subscriber_count, NumberFormatting::Separator) %></p>
             <% if !item.auto_generated %><p><%= translate_count(locale, "generic_videos_count", item.video_count, NumberFormatting::Separator) %></p><% end %>
             <h5><%= item.description_html %></h5>
-        <% when SearchPlaylist, InvidiousPlaylist %>
+        </div>
+    </div>
+<% when SearchPlaylist, InvidiousPlaylist %>
+    <div class="pure-u-1 pure-u-md-1-4">
+        <div class="h-box">
             <% if item.id.starts_with? "RD" %>
                 <% url = "/mix?list=#{item.id}&continuation=#{URI.parse(item.thumbnail || "https://proxy.invidio.xamh.de/vi/-----------").request_target.split("/")[2]}" %>
             <% else %>
@@ -32,8 +36,12 @@
             <a href="/channel/<%= item.ucid %>">
                 <p dir="auto"><b><%= HTML.escape(item.author) %><% if !item.is_a?(InvidiousPlaylist) && !item.author_verified.nil? && item.author_verified %>&nbsp;<i class="icon ion ion-md-checkmark-circle"></i><% end %></b></p>
             </a>
-        <% when MixVideo %>
-            <% if item.length_seconds > env.get("preferences").as(Preferences).hide_video_shorter_than %>
+        </div>
+    </div>
+<% when MixVideo %>
+    <% if item.length_seconds > env.get("preferences").as(Preferences).hide_video_shorter_than %>
+        <div class="pure-u-1 pure-u-md-1-4">
+            <div class="h-box">
                 <a href="/watch?v=<%= item.id %>&list=<%= item.rdid %>">
                     <% if !env.get("preferences").as(Preferences).thin_mode %>
                         <div class="thumbnail">
@@ -48,9 +56,13 @@
                 <a href="/channel/<%= item.ucid %>">
                     <p dir="auto"><b><%= HTML.escape(item.author) %></b></p>
                 </a>
-            <% end %>
-        <% when PlaylistVideo %>
-        <% if (item.responds_to?(:live_now) && item.live_now ) || item.length_seconds == 0 || (item.length_seconds != 0 && item.length_seconds > env.get("preferences").as(Preferences).hide_video_shorter_than) %>
+            </div>
+        </div>
+    <% end %>
+<% when PlaylistVideo %>
+    <% if (item.responds_to?(:live_now) && item.live_now ) || item.length_seconds == 0 || (item.length_seconds != 0 && item.length_seconds > env.get("preferences").as(Preferences).hide_video_shorter_than) %>
+        <div class="pure-u-1 pure-u-md-1-4">
+            <div class="h-box">
                 <a style="width:100%" href="/watch?v=<%= item.id %>&list=<%= item.plid %>&index=<%= item.index %>">
                     <% if !env.get("preferences").as(Preferences).thin_mode %>
                         <div class="thumbnail">
@@ -98,10 +110,14 @@
                     </div>
                     <% end %>
                 </div>
-            <% end %>
-        <% when Category %>
-        <% else %>
-            <% if (item.responds_to?(:live_now) && item.live_now ) || item.length_seconds == 0 || (item.length_seconds != 0 && item.length_seconds > env.get("preferences").as(Preferences).hide_video_shorter_than) %>
+            </div>
+        </div>
+    <% end %>
+<% when Category %>
+<% else %>
+    <% if (item.responds_to?(:live_now) && item.live_now ) || item.length_seconds == 0 || (item.length_seconds != 0 && item.length_seconds > env.get("preferences").as(Preferences).hide_video_shorter_than) %>
+        <div class="pure-u-1 pure-u-md-1-4">
+            <div class="h-box">
                 <a style="width:100%" href="/watch?v=<%= item.id %>">
                     <% if !env.get("preferences").as(Preferences).thin_mode %>
                         <div class="thumbnail">
@@ -158,7 +174,7 @@
                     </div>
                     <% end %>
                 </div>
-            <% end %>
-        <% end %>
-    </div>
-</div>
+            </div>
+        </div>
+    <% end %>
+<% end %>
