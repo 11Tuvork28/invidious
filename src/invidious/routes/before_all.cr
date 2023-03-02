@@ -39,10 +39,10 @@ module Invidious::Routes::BeforeAll
     # inline styles (<style> [..] </style>, style=" [..] ")
     env.response.headers["Content-Security-Policy"] = {
       "default-src 'self' *.xamh.de watch.thekitty.zone",
-      "script-src 'self' static.xamh.de",
-      "style-src 'self' static.xamh.de 'unsafe-inline'",
+      "script-src 'self'",
+      "style-src 'self' 'unsafe-inline'",
       "img-src 'self' proxy.invidio.xamh.de data:",
-      "font-src 'self' static.xamh.de data:",
+      "font-src 'self' data:",
       "connect-src 'self'  proxy.invidio.xamh.de",
       "manifest-src 'self'  *.xamh.de watch.thekitty.zone",
       "media-src 'self' *.xamh.de watch.thekitty.zone blob:" + extra_media_csp,

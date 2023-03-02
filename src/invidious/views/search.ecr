@@ -1,6 +1,6 @@
 <% content_for "header" do %>
 <title><%= query.text.size > 30 ? HTML.escape(query.text[0,30].rstrip(".")) + "&hellip;" : HTML.escape(query.text) %> - Invidious</title>
-<link rel="stylesheet" href="https://static.xamh.de/css/search.css?v=<%= ASSET_COMMIT %>">
+<link rel="stylesheet" href="/css/search.css?v=<%= ASSET_COMMIT %>">
 <% end %>
 
 <!-- Search redirection and filtering UI -->
