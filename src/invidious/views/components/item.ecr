@@ -1,3 +1,5 @@
+<% item_watched = !item.is_a?(SearchChannel | SearchPlaylist | InvidiousPlaylist | Category) && env.get?("user").try &.as(User).watched.index(item.id) != nil %>
+
 <% case item when %>
 <% when SearchChannel %>
     <div class="pure-u-1 pure-u-md-1-4">
@@ -45,9 +47,14 @@
                 <a href="/watch?v=<%= item.id %>&list=<%= item.rdid %>">
                     <% if !env.get("preferences").as(Preferences).thin_mode %>
                         <div class="thumbnail">
-                            <img loading="lazy" tabindex="-1" class="thumbnail" src="https://proxy.invidio.xamh.de/vi/<%= item.id %>/mqdefault.jpg?host=i.ytimg.com"/>
+                            <img loading="lazy" tabindex="-1" class="thumbnail" src="/vi/<%= item.id %>/mqdefault.jpg"/>
                             <% if item.length_seconds != 0 %>
                                 <p class="length"><%= recode_length_seconds(item.length_seconds) %></p>
+                            <% end %>
+
+                            <% if item_watched %>
+                                <div class="watched-overlay"></div>
+                                <div class="watched-indicator" data-length="<%= item.length_seconds %>" data-id="<%= item.id %>"></div>
                             <% end %>
                         </div>
                     <% end %>
@@ -66,7 +73,7 @@
                 <a style="width:100%" href="/watch?v=<%= item.id %>&list=<%= item.plid %>&index=<%= item.index %>">
                     <% if !env.get("preferences").as(Preferences).thin_mode %>
                         <div class="thumbnail">
-                            <img loading="lazy" tabindex="-1" class="thumbnail" src="https://proxy.invidio.xamh.de/vi/<%= item.id %>/mqdefault.jpg?host=i.ytimg.com"/>
+                            <img loading="lazy" tabindex="-1" class="thumbnail" src="/vi/<%= item.id %>/mqdefault.jpg"/>
 
                             <% if plid_form = env.get?("remove_playlist_items") %>
                                 <form data-onsubmit="return_false" action="/playlist_ajax?action_remove_video=1&set_video_id=<%= item.index %>&playlist_id=<%= plid_form %>&referer=<%= env.get("current_page") %>" method="post">
@@ -81,6 +88,11 @@
                                 <p class="length"><i class="icon ion-ios-play-circle"></i> <%= translate(locale, "LIVE") %></p>
                             <% elsif item.length_seconds != 0 %>
                                 <p class="length"><%= recode_length_seconds(item.length_seconds) %></p>
+                            <% end %>
+
+                            <% if item_watched %>
+                                <div class="watched-overlay"></div>
+                                <div class="watched-indicator" data-length="<%= item.length_seconds %>" data-id="<%= item.id %>"></div>
                             <% end %>
                         </div>
                     <% end %>
@@ -116,12 +128,12 @@
 <% when Category %>
 <% else %>
     <% if (item.responds_to?(:live_now) && item.live_now ) || item.length_seconds == 0 || (item.length_seconds != 0 && item.length_seconds > env.get("preferences").as(Preferences).hide_video_shorter_than) %>
-        <div class="pure-u-1 pure-u-md-1-4">
-            <div class="h-box">
+            <div class="pure-u-1 pure-u-md-1-4">
+                <div class="h-box">
                 <a style="width:100%" href="/watch?v=<%= item.id %>">
                     <% if !env.get("preferences").as(Preferences).thin_mode %>
                         <div class="thumbnail">
-                            <img loading="lazy" tabindex="-1" class="thumbnail" src="https://proxy.invidio.xamh.de/vi/<%= item.id %>/mqdefault.jpg?host=i.ytimg.com"/>
+                            <img loading="lazy" tabindex="-1" class="thumbnail" src="/vi/<%= item.id %>/mqdefault.jpg"/>
                             <% if env.get? "show_watched" %>
                                 <form data-onsubmit="return_false" action="/watch_ajax?action_mark_watched=1&id=<%= item.id %>&referer=<%= env.get("current_page") %>" method="post">
                                     <input type="hidden" name="csrf_token" value="<%= HTML.escape(env.get?("csrf_token").try &.as(String) || "") %>">
@@ -144,6 +156,11 @@
                                 <p class="length" dir="auto"><i class="icon ion-ios-play-circle"></i> <%= translate(locale, "LIVE") %></p>
                             <% elsif item.length_seconds != 0 %>
                                 <p class="length"><%= recode_length_seconds(item.length_seconds) %></p>
+                            <% end %>
+
+                            <% if item_watched %>
+                                <div class="watched-overlay"></div>
+                                <div class="watched-indicator" data-length="<%= item.length_seconds %>" data-id="<%= item.id %>"></div>
                             <% end %>
                         </div>
                     <% end %>
