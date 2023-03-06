@@ -591,6 +591,7 @@ if (loop_button) {
   loop_button.addEventListener("click", function (event) {
     playlistManager.toggleLoop();
   });
+}
 var reverse_button = document.getElementById("reverse");
 if (reverse_button) {
   //@ts-ignore
