@@ -58,6 +58,7 @@ class PlaylistData {
   private isCustom: boolean;
   private playedTrackIndecies: Array<number>;
   private playNextIndexOverwrite: number | undefined;
+  private reversed: boolean;
 
   constructor() {
     this.loop_all = false;
@@ -70,6 +71,7 @@ class PlaylistData {
     this.offsets = {};
     this.isCustom = false;
     this.playedTrackIndecies = [];
+    this.reversed = false;
   }
   fromJson(playerData: PlaylistData): PlaylistData {
     this.loop_all = playerData.loop_all || false;
@@ -84,6 +86,7 @@ class PlaylistData {
     this.playedTrackIndecies = playerData.playedTrackIndecies || [];
     this.playNextIndexOverwrite =
       playerData.playNextIndexOverwrite || undefined;
+    this.reversed = playerData.reversed || false;
     return this;
   }
   toJson(): PlaylistData {
@@ -208,6 +211,10 @@ class PlaylistData {
   }
   toggleLoop() {
     this.loop_all = !this.loop_all;
+  }
+  toggleReverse() {
+    this.reversed = this.reversed;
+    this.tracks.reverse();
   }
   getTrackByIndex(index: number): Track {
     return this.tracks[index];
@@ -382,6 +389,14 @@ class PlaylistManager {
   }
   toggleLoop() {
     this.playerData.toggleLoop();
+    this.toLocalStorage();
+  }
+  toggleReverse() {
+    var tracks = this.playlistNode.children[1].children[0];
+    var i = tracks.childNodes.length;
+    while (i--)
+      tracks.appendChild(tracks.childNodes[i]);
+    this.playerData.toggleReverse();
     this.toLocalStorage();
   }
   addVideo(video_id: string) {
@@ -575,6 +590,14 @@ if (loop_button) {
   loop_button.checked = playlistManager.playerData.loop_all;
   loop_button.addEventListener("click", function (event) {
     playlistManager.toggleLoop();
+  });
+}
+var reverse_button = document.getElementById("reverse");
+if (reverse_button) {
+  //@ts-ignore
+  reverse_button.checked = playlistManager.playerData.reversed;
+  reverse_button.addEventListener("click", function (event) {
+    playlistManager.toggleReverse();
   });
 }
 
