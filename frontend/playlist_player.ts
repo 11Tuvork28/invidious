@@ -553,6 +553,7 @@ addEventListener("load", (ev) => {
     ) {
       playlistManager.createPlaylistFrom(video_data.id);
       playlistManager.addVideo("rv%"+video_data.next_video);
+      playlistManager.next();
     } else return;
   });
   // Hook to always load the custom playlist if one was created.
