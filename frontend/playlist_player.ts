@@ -485,7 +485,7 @@ class PlaylistManager {
   }
 }
 
-// HOOKS, we want to ts to ignore this so here we tell it to ignore it.
+// HOOKS, we want ts to ignore this here, so we tell it to ignore it.
 
 // Add event handlers to the buttons and it adds the buttons so that the use has a normal experince if no js
 function addEventHandlersRelatedVideos() {
@@ -510,6 +510,9 @@ function addEventHandlersRelatedVideos() {
 }
 // We need to wait for everything to load so that we can safely override everything.
 addEventListener("load", (ev) => {
+  // Unregister all registered event handlers so we have an easier time overriding.
+  //@ts-ignore
+  player.off("ended");
   //@ts-ignore
   addEventHandlersRelatedVideos();
   //@ts-ignore
