@@ -523,7 +523,7 @@ hr {
 
 #descexpansionbutton ~ div {
   overflow: hidden;
-  height: 8.3em;
+  max-height: 8.3em;
 }
 
 #descexpansionbutton:checked ~ div {
@@ -591,3 +591,7 @@ p,
 
 /* Wider settings name to less word wrap */
 .pure-form-aligned .pure-control-group label { width: 19em; }
+
+.channel-emoji {
+  margin: 0 2px;
+}
